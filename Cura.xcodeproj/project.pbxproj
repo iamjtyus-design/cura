@@ -112,10 +112,36 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		100000000000000000000601 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
-		100000000000000000000602 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000111 /* CuraCore.framework in Frameworks */, ); runOnlyForDeploymentPostprocessing = 0; };
-		100000000000000000000603 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000115 /* CuraCore.framework in Frameworks */, ); runOnlyForDeploymentPostprocessing = 0; };
-		100000000000000000000604 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		100000000000000000000601 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		100000000000000000000602 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				100000000000000000000111 /* CuraCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		100000000000000000000603 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				100000000000000000000115 /* CuraCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		100000000000000000000604 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -134,10 +160,10 @@
 			children = (
 				100000000000000000000704 /* App */,
 				100000000000000000000705 /* Core */,
-				100000000000000000000708 /* DesignSystem */,
+				100000000000000000000708 /* DesignSystem/Tokens */,
 				200000000000000000000700 /* Features */,
-				300000000000000000000702 /* AudioServices */,
-				100000000000000000000709 /* Services */,
+				300000000000000000000702 /* Services/Audio */,
+				100000000000000000000709 /* Services/Processing */,
 			);
 			path = Cura;
 			sourceTree = "<group>";
@@ -187,37 +213,53 @@
 		};
 		100000000000000000000707 /* Models */ = {
 			isa = PBXGroup;
-			children = (100000000000000000000003 /* DomainModels.swift */, );
+			children = (
+				100000000000000000000003 /* DomainModels.swift */,
+			);
 			path = Models;
 			sourceTree = "<group>";
 		};
-		100000000000000000000708 /* DesignSystem */ = {
+		100000000000000000000708 /* DesignSystem/Tokens */ = {
 			isa = PBXGroup;
-			children = (100000000000000000000005 /* DesignTokens.swift */, );
+			children = (
+				100000000000000000000005 /* DesignTokens.swift */,
+			);
 			path = DesignSystem/Tokens;
 			sourceTree = "<group>";
 		};
-		100000000000000000000709 /* Services */ = {
+		100000000000000000000709 /* Services/Processing */ = {
 			isa = PBXGroup;
-			children = (100000000000000000000006 /* MockProviders.swift */, 100000000000000000000007 /* ProviderProtocols.swift */, );
+			children = (
+				100000000000000000000006 /* MockProviders.swift */,
+				100000000000000000000007 /* ProviderProtocols.swift */,
+			);
 			path = Services/Processing;
 			sourceTree = "<group>";
 		};
 		100000000000000000000710 /* CuraTests */ = {
 			isa = PBXGroup;
-			children = (100000000000000000000013 /* DomainModelTests.swift */, 100000000000000000000014 /* DependencyContainerTests.swift */, 200000000000000000000010 /* PhaseOneViewModelTests.swift */, 300000000000000000000006 /* AudioRecordingTests.swift */, );
+			children = (
+				100000000000000000000013 /* DomainModelTests.swift */,
+				100000000000000000000014 /* DependencyContainerTests.swift */,
+				200000000000000000000010 /* PhaseOneViewModelTests.swift */,
+				300000000000000000000006 /* AudioRecordingTests.swift */,
+			);
 			path = CuraTests;
 			sourceTree = "<group>";
 		};
 		100000000000000000000711 /* CuraUITests */ = {
 			isa = PBXGroup;
-			children = (100000000000000000000015 /* CuraUITests.swift */, );
+			children = (
+				100000000000000000000015 /* CuraUITests.swift */,
+			);
 			path = CuraUITests;
 			sourceTree = "<group>";
 		};
 		100000000000000000000712 /* Persistence */ = {
 			isa = PBXGroup;
-			children = (100000000000000000000004 /* PersistenceProtocols.swift */, );
+			children = (
+				100000000000000000000004 /* PersistenceProtocols.swift */,
+			);
 			path = Persistence;
 			sourceTree = "<group>";
 		};
@@ -238,55 +280,78 @@
 		};
 		200000000000000000000701 /* Home */ = {
 			isa = PBXGroup;
-			children = (200000000000000000000001 /* HomeView.swift */, );
+			children = (
+				200000000000000000000001 /* HomeView.swift */,
+			);
 			path = Home;
 			sourceTree = "<group>";
 		};
 		200000000000000000000702 /* SessionSetup */ = {
 			isa = PBXGroup;
-			children = (200000000000000000000002 /* SessionSetupView.swift */, );
+			children = (
+				200000000000000000000002 /* SessionSetupView.swift */,
+			);
 			path = SessionSetup;
 			sourceTree = "<group>";
 		};
 		200000000000000000000703 /* SessionDetail */ = {
 			isa = PBXGroup;
-			children = (200000000000000000000003 /* SessionDetailView.swift */, );
+			children = (
+				200000000000000000000003 /* SessionDetailView.swift */,
+			);
 			path = SessionDetail;
 			sourceTree = "<group>";
 		};
 		200000000000000000000704 /* Processing */ = {
 			isa = PBXGroup;
-			children = (200000000000000000000004 /* ProcessingStagesView.swift */, );
+			children = (
+				200000000000000000000004 /* ProcessingStagesView.swift */,
+			);
 			path = Processing;
 			sourceTree = "<group>";
 		};
 		200000000000000000000705 /* Library */ = {
 			isa = PBXGroup;
-			children = (200000000000000000000005 /* FolderComposer.swift */, 200000000000000000000006 /* SessionRow.swift */, );
+			children = (
+				200000000000000000000005 /* FolderComposer.swift */,
+				200000000000000000000006 /* SessionRow.swift */,
+			);
 			path = Library;
 			sourceTree = "<group>";
 		};
 		200000000000000000000706 /* QuickSend */ = {
 			isa = PBXGroup;
-			children = (200000000000000000000007 /* ActivityView.swift */, );
+			children = (
+				200000000000000000000007 /* ActivityView.swift */,
+			);
 			path = QuickSend;
 			sourceTree = "<group>";
 		};
 		200000000000000000000707 /* PhaseOne */ = {
 			isa = PBXGroup;
-			children = (200000000000000000000008 /* PhaseOneViewModel.swift */, 200000000000000000000009 /* PhaseOneProcessingStage.swift */, );
+			children = (
+				200000000000000000000008 /* PhaseOneViewModel.swift */,
+				200000000000000000000009 /* PhaseOneProcessingStage.swift */,
+			);
 			path = PhaseOne;
 			sourceTree = "<group>";
 		};
 		300000000000000000000701 /* AudioRecording */ = {
 			isa = PBXGroup;
-			children = (300000000000000000000001 /* AudioRecordingStateMachine.swift */, 300000000000000000000002 /* AudioRecordingViewModel.swift */, 300000000000000000000003 /* AudioRecordingView.swift */, 300000000000000000000004 /* AudioPlaybackView.swift */, );
+			children = (
+				300000000000000000000001 /* AudioRecordingStateMachine.swift */,
+				300000000000000000000002 /* AudioRecordingViewModel.swift */,
+				300000000000000000000003 /* AudioRecordingView.swift */,
+				300000000000000000000004 /* AudioPlaybackView.swift */,
+			);
 			path = AudioRecording;
 			sourceTree = "<group>";
 		};
-		300000000000000000000702 /* AudioServices */ = {
+		300000000000000000000702 /* Services/Audio */ = {
 			isa = PBXGroup;
-			children = (300000000000000000000005 /* AudioRecordingProviders.swift */, );
+			children = (
+				300000000000000000000005 /* AudioRecordingProviders.swift */,
+			);
 			path = Services/Audio;
 			sourceTree = "<group>";
 		};
@@ -296,9 +361,14 @@
 		100000000000000000000401 /* CuraCore */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 100000000000000000001001 /* Build configuration list for PBXNativeTarget "CuraCore" */;
-			buildPhases = (100000000000000000000801 /* Sources */, 100000000000000000000601 /* Frameworks */, );
-			buildRules = ();
-			dependencies = ();
+			buildPhases = (
+				100000000000000000000801 /* Sources */,
+				100000000000000000000601 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
 			name = CuraCore;
 			productName = CuraCore;
 			productReference = 100000000000000000000020 /* CuraCore.framework */;
@@ -307,9 +377,16 @@
 		100000000000000000000402 /* CuraApp */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 100000000000000000001002 /* Build configuration list for PBXNativeTarget "CuraApp" */;
-			buildPhases = (100000000000000000000802 /* Sources */, 100000000000000000000602 /* Frameworks */, 100000000000000000000501 /* Embed Frameworks */, );
-			buildRules = ();
-			dependencies = (100000000000000000000901 /* PBXTargetDependency */, );
+			buildPhases = (
+				100000000000000000000802 /* Sources */,
+				100000000000000000000602 /* Frameworks */,
+				100000000000000000000501 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				100000000000000000000901 /* PBXTargetDependency */,
+			);
 			name = CuraApp;
 			productName = Cura;
 			productReference = 100000000000000000000021 /* Cura.app */;
@@ -318,9 +395,15 @@
 		100000000000000000000403 /* CuraTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 100000000000000000001003 /* Build configuration list for PBXNativeTarget "CuraTests" */;
-			buildPhases = (100000000000000000000803 /* Sources */, 100000000000000000000603 /* Frameworks */, );
-			buildRules = ();
-			dependencies = (100000000000000000000902 /* PBXTargetDependency */, );
+			buildPhases = (
+				100000000000000000000803 /* Sources */,
+				100000000000000000000603 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				100000000000000000000902 /* PBXTargetDependency */,
+			);
 			name = CuraTests;
 			productName = CuraTests;
 			productReference = 100000000000000000000022 /* CuraTests.xctest */;
@@ -329,9 +412,15 @@
 		100000000000000000000404 /* CuraUITests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 100000000000000000001004 /* Build configuration list for PBXNativeTarget "CuraUITests" */;
-			buildPhases = (100000000000000000000804 /* Sources */, 100000000000000000000604 /* Frameworks */, );
-			buildRules = ();
-			dependencies = (100000000000000000000903 /* PBXTargetDependency */, );
+			buildPhases = (
+				100000000000000000000804 /* Sources */,
+				100000000000000000000604 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				100000000000000000000903 /* PBXTargetDependency */,
+			);
 			name = CuraUITests;
 			productName = CuraUITests;
 			productReference = 100000000000000000000023 /* CuraUITests.xctest */;
@@ -347,58 +436,397 @@
 				LastSwiftUpdateCheck = 2660;
 				LastUpgradeCheck = 2660;
 				TargetAttributes = {
-					100000000000000000000401 = {CreatedOnToolsVersion = 26.6; };
-					100000000000000000000402 = {CreatedOnToolsVersion = 26.6; };
-					100000000000000000000403 = {CreatedOnToolsVersion = 26.6; TestTargetID = 100000000000000000000401; };
-					100000000000000000000404 = {CreatedOnToolsVersion = 26.6; TestTargetID = 100000000000000000000402; };
+					100000000000000000000401 = {
+						CreatedOnToolsVersion = 26.6;
+					};
+					100000000000000000000402 = {
+						CreatedOnToolsVersion = 26.6;
+					};
+					100000000000000000000403 = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = 100000000000000000000401;
+					};
+					100000000000000000000404 = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = 100000000000000000000402;
+					};
 				};
 			};
 			buildConfigurationList = 100000000000000000001000 /* Build configuration list for PBXProject "Cura" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
-			knownRegions = (en, Base, );
+			knownRegions = (
+				en,
+				Base,
+			);
 			mainGroup = 100000000000000000000701;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 100000000000000000000703 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
-			targets = (100000000000000000000401 /* CuraCore */, 100000000000000000000402 /* CuraApp */, 100000000000000000000403 /* CuraTests */, 100000000000000000000404 /* CuraUITests */, );
+			targets = (
+				100000000000000000000401 /* CuraCore */,
+				100000000000000000000402 /* CuraApp */,
+				100000000000000000000403 /* CuraTests */,
+				100000000000000000000404 /* CuraUITests */,
+			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		100000000000000000000801 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000101, 100000000000000000000102, 100000000000000000000103, 100000000000000000000104, 100000000000000000000105, 100000000000000000000106, 100000000000000000000107, 200000000000000000000101, 200000000000000000000102, 200000000000000000000103, 200000000000000000000104, 200000000000000000000105, 200000000000000000000106, 200000000000000000000107, 200000000000000000000108, 200000000000000000000109, 300000000000000000000101, 300000000000000000000102, 300000000000000000000103, 300000000000000000000104, 300000000000000000000105, ); runOnlyForDeploymentPostprocessing = 0; };
-		100000000000000000000802 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000108, 100000000000000000000109, 100000000000000000000110, ); runOnlyForDeploymentPostprocessing = 0; };
-		100000000000000000000803 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000113, 100000000000000000000114, 200000000000000000000110, 300000000000000000000106, ); runOnlyForDeploymentPostprocessing = 0; };
-		100000000000000000000804 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000116, ); runOnlyForDeploymentPostprocessing = 0; };
+		100000000000000000000801 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				100000000000000000000101 /* AppConfiguration.swift in Sources */,
+				100000000000000000000102 /* DependencyContainer.swift in Sources */,
+				100000000000000000000103 /* DomainModels.swift in Sources */,
+				100000000000000000000104 /* PersistenceProtocols.swift in Sources */,
+				100000000000000000000105 /* DesignTokens.swift in Sources */,
+				100000000000000000000106 /* MockProviders.swift in Sources */,
+				100000000000000000000107 /* ProviderProtocols.swift in Sources */,
+				200000000000000000000101 /* HomeView.swift in Sources */,
+				200000000000000000000102 /* SessionSetupView.swift in Sources */,
+				200000000000000000000103 /* SessionDetailView.swift in Sources */,
+				200000000000000000000104 /* ProcessingStagesView.swift in Sources */,
+				200000000000000000000105 /* FolderComposer.swift in Sources */,
+				200000000000000000000106 /* SessionRow.swift in Sources */,
+				200000000000000000000107 /* ActivityView.swift in Sources */,
+				200000000000000000000108 /* PhaseOneViewModel.swift in Sources */,
+				200000000000000000000109 /* PhaseOneProcessingStage.swift in Sources */,
+				300000000000000000000101 /* AudioRecordingStateMachine.swift in Sources */,
+				300000000000000000000102 /* AudioRecordingViewModel.swift in Sources */,
+				300000000000000000000103 /* AudioRecordingView.swift in Sources */,
+				300000000000000000000104 /* AudioPlaybackView.swift in Sources */,
+				300000000000000000000105 /* AudioRecordingProviders.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		100000000000000000000802 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				100000000000000000000108 /* AppCoordinator.swift in Sources */,
+				100000000000000000000109 /* ContentView.swift in Sources */,
+				100000000000000000000110 /* CuraApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		100000000000000000000803 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				100000000000000000000113 /* DomainModelTests.swift in Sources */,
+				100000000000000000000114 /* DependencyContainerTests.swift in Sources */,
+				200000000000000000000110 /* PhaseOneViewModelTests.swift in Sources */,
+				300000000000000000000106 /* AudioRecordingTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		100000000000000000000804 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				100000000000000000000116 /* CuraUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		100000000000000000000901 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = 100000000000000000000401 /* CuraCore */; targetProxy = 100000000000000000000201 /* PBXContainerItemProxy */; };
-		100000000000000000000902 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = 100000000000000000000401 /* CuraCore */; targetProxy = 100000000000000000000201 /* PBXContainerItemProxy */; };
-		100000000000000000000903 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = 100000000000000000000402 /* CuraApp */; targetProxy = 100000000000000000000202 /* PBXContainerItemProxy */; };
+		100000000000000000000901 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 100000000000000000000401 /* CuraCore */;
+			targetProxy = 100000000000000000000201 /* PBXContainerItemProxy */;
+		};
+		100000000000000000000902 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 100000000000000000000401 /* CuraCore */;
+			targetProxy = 100000000000000000000201 /* PBXContainerItemProxy */;
+		};
+		100000000000000000000903 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 100000000000000000000402 /* CuraApp */;
+			targetProxy = 100000000000000000000202 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		100000000000000000001101 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ANALYZER_NONNULL = YES; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; CLANG_ENABLE_OBJC_WEAK = YES; CLANG_WARN_DOCUMENTATION_COMMENTS = YES; CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES; CODE_SIGNING_ALLOWED = NO; COPY_PHASE_STRIP = NO; DEBUG_INFORMATION_FORMAT = dwarf; ENABLE_STRICT_OBJC_MSGSEND = YES; ENABLE_TESTABILITY = YES; GCC_C_LANGUAGE_STANDARD = gnu17; GCC_DYNAMIC_NO_PIC = NO; GCC_NO_COMMON_BLOCKS = YES; GCC_OPTIMIZATION_LEVEL = 0; GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1", "$(inherited)", ); IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE; ONLY_ACTIVE_ARCH = YES; SDKROOT = iphoneos; SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG; SWIFT_VERSION = 6.0; }; name = Debug; };
-		100000000000000000001102 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ANALYZER_NONNULL = YES; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; CLANG_ENABLE_OBJC_WEAK = YES; CLANG_WARN_DOCUMENTATION_COMMENTS = YES; CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES; CODE_SIGNING_ALLOWED = NO; COPY_PHASE_STRIP = NO; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; ENABLE_NS_ASSERTIONS = NO; ENABLE_STRICT_OBJC_MSGSEND = YES; GCC_C_LANGUAGE_STANDARD = gnu17; GCC_NO_COMMON_BLOCKS = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; MTL_ENABLE_DEBUG_INFO = NO; SDKROOT = iphoneos; SWIFT_COMPILATION_MODE = wholemodule; SWIFT_VERSION = 6.0; VALIDATE_PRODUCT = YES; }; name = Release; };
-		100000000000000000001201 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; DEFINES_MODULE = YES; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = CuraCore; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura.core; PRODUCT_NAME = "$(TARGET_NAME)"; SKIP_INSTALL = YES; SWIFT_VERSION = 6.0; }; name = Debug; };
-		100000000000000000001202 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; DEFINES_MODULE = YES; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = CuraCore; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura.core; PRODUCT_NAME = "$(TARGET_NAME)"; SKIP_INSTALL = YES; SWIFT_VERSION = 6.0; }; name = Release; };
-		100000000000000000001301 /* Debug */ = {isa = XCBuildConfiguration; baseConfigurationReference = 100000000000000000000011 /* Development.xcconfig */; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = CURA; INFOPLIST_KEY_NSMicrophoneUsageDescription = "CURA uses the microphone to record audio you choose to capture and turn it into notes and other outputs."; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura; PRODUCT_NAME = Cura; SWIFT_VERSION = 6.0; }; name = Debug; };
-		100000000000000000001302 /* Release */ = {isa = XCBuildConfiguration; baseConfigurationReference = 100000000000000000000016 /* Production.xcconfig */; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = CURA; INFOPLIST_KEY_NSMicrophoneUsageDescription = "CURA uses the microphone to record audio you choose to capture and turn it into notes and other outputs."; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura; PRODUCT_NAME = Cura; SWIFT_VERSION = 6.0; }; name = Release; };
-		100000000000000000001401 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura.tests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 6.0; TEST_TARGET_NAME = CuraCore; }; name = Debug; };
-		100000000000000000001402 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura.tests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 6.0; TEST_TARGET_NAME = CuraCore; }; name = Release; };
-		100000000000000000001501 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 6.0; TEST_TARGET_NAME = CuraApp; }; name = Debug; };
-		100000000000000000001502 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 6.0; TEST_TARGET_NAME = CuraApp; }; name = Release; };
+		100000000000000000001101 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGNING_ALLOWED[sdk=iphoneos*]" = YES;
+				"CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]" = NO;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		100000000000000000001102 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGNING_ALLOWED[sdk=iphoneos*]" = YES;
+				"CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]" = NO;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		100000000000000000001201 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGNING_ALLOWED[sdk=iphoneos*]" = YES;
+				"CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]" = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEFINES_MODULE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = CuraCore;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura.core;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		100000000000000000001202 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGNING_ALLOWED[sdk=iphoneos*]" = YES;
+				"CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]" = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEFINES_MODULE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = CuraCore;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura.core;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		100000000000000000001301 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 100000000000000000000011 /* Development.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGNING_ALLOWED[sdk=iphoneos*]" = YES;
+				"CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]" = NO;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = CURA;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "CURA uses the microphone to record audio you choose to capture and turn it into notes and other outputs.";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura;
+				PRODUCT_NAME = Cura;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		100000000000000000001302 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 100000000000000000000016 /* Production.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGNING_ALLOWED[sdk=iphoneos*]" = YES;
+				"CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]" = NO;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = CURA;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "CURA uses the microphone to record audio you choose to capture and turn it into notes and other outputs.";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura;
+				PRODUCT_NAME = Cura;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		100000000000000000001401 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGNING_ALLOWED[sdk=iphoneos*]" = YES;
+				"CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]" = NO;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = CuraCore;
+			};
+			name = Debug;
+		};
+		100000000000000000001402 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGNING_ALLOWED[sdk=iphoneos*]" = YES;
+				"CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]" = NO;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = CuraCore;
+			};
+			name = Release;
+		};
+		100000000000000000001501 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGNING_ALLOWED[sdk=iphoneos*]" = YES;
+				"CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]" = NO;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = CuraApp;
+			};
+			name = Debug;
+		};
+		100000000000000000001502 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGNING_ALLOWED[sdk=iphoneos*]" = YES;
+				"CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]" = NO;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = CuraApp;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		100000000000000000001000 /* Build configuration list for PBXProject "Cura" */ = {isa = XCConfigurationList; buildConfigurations = (100000000000000000001101 /* Debug */, 100000000000000000001102 /* Release */, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
-		100000000000000000001001 /* Build configuration list for PBXNativeTarget "CuraCore" */ = {isa = XCConfigurationList; buildConfigurations = (100000000000000000001201 /* Debug */, 100000000000000000001202 /* Release */, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
-		100000000000000000001002 /* Build configuration list for PBXNativeTarget "CuraApp" */ = {isa = XCConfigurationList; buildConfigurations = (100000000000000000001301 /* Debug */, 100000000000000000001302 /* Release */, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
-		100000000000000000001003 /* Build configuration list for PBXNativeTarget "CuraTests" */ = {isa = XCConfigurationList; buildConfigurations = (100000000000000000001401 /* Debug */, 100000000000000000001402 /* Release */, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
-		100000000000000000001004 /* Build configuration list for PBXNativeTarget "CuraUITests" */ = {isa = XCConfigurationList; buildConfigurations = (100000000000000000001501 /* Debug */, 100000000000000000001502 /* Release */, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
+		100000000000000000001000 /* Build configuration list for PBXProject "Cura" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				100000000000000000001101 /* Debug */,
+				100000000000000000001102 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		100000000000000000001001 /* Build configuration list for PBXNativeTarget "CuraCore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				100000000000000000001201 /* Debug */,
+				100000000000000000001202 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		100000000000000000001002 /* Build configuration list for PBXNativeTarget "CuraApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				100000000000000000001301 /* Debug */,
+				100000000000000000001302 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		100000000000000000001003 /* Build configuration list for PBXNativeTarget "CuraTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				100000000000000000001401 /* Debug */,
+				100000000000000000001402 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		100000000000000000001004 /* Build configuration list for PBXNativeTarget "CuraUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				100000000000000000001501 /* Debug */,
+				100000000000000000001502 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 /* End XCConfigurationList section */
 	};
 	rootObject = 100000000000000000000300 /* Project object */;

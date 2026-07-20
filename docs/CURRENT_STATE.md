@@ -64,6 +64,19 @@ Verification on 2026-07-20:
 11. Native scheme-level tests executed 19 unit tests and 2 UI tests with 0 failures.
 12. Phase 0 commit is pushed to `origin/main`.
 13. Phase 1 commit is pushed to `origin/main`.
-14. Phase 2A changes are ready for final verification, commit, and push.
+14. Phase 2A commit is pushed to `origin/main`.
+15. Device Debug signing is configured for automatic iPhone signing without committing a personal Team ID.
+16. `CuraCore.framework` remains embedded with `CodeSignOnCopy` and is signed in device builds.
 
 No cloud upload, transcription, AI generation, Supabase, RevenueCat, authentication, or Phase 2B work has started.
+
+Signing verification on 2026-07-20:
+
+1. Root cause of the physical-install failure was unconditional `CODE_SIGNING_ALLOWED = NO` in the Xcode project build settings, which produced an unsigned `Cura.app`.
+2. `Cura.xcodeproj/project.pbxproj` now uses automatic signing with `CODE_SIGN_IDENTITY = Apple Development`.
+3. `CODE_SIGNING_ALLOWED` is now `YES` for `iphoneos` and `NO` for `iphonesimulator`, keeping CI simulator builds team-free.
+4. No `DEVELOPMENT_TEAM` or `PROVISIONING_PROFILE_SPECIFIER` value is committed.
+5. Connected device build for iPhone `00008150-001643EA0C3A401C` succeeded with the team supplied as a local command-line override.
+6. `codesign --verify --deep --strict --verbose=4` passed for the built `Cura.app`.
+7. `codesign --verify --strict --verbose=4` passed for embedded `CuraCore.framework`.
+8. Simulator scheme tests passed again on iPhone 17 Pro, iOS 26.5, UDID `0001DB82-B759-4301-AB9C-F79DC34B9867`.

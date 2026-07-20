@@ -76,10 +76,12 @@ Phase 2A reliable local audio capture is implemented and verified locally. Phase
 7. `sh scripts/secret_scan.sh` passes.
 8. `xcodebuild -project Cura.xcodeproj -scheme CuraApp -destination 'id=0001DB82-B759-4301-AB9C-F79DC34B9867' test` passes.
 9. Native scheme-level verification executed 19 unit tests and 2 UI tests with 0 failures.
+10. Device Debug build for connected iPhone `00008150-001643EA0C3A401C` passes when the local development team is supplied outside committed source.
+11. `Cura.app` and embedded `CuraCore.framework` pass `codesign` verification.
 
 ## Blocked
 
-1. Apple Developer account details.
+1. Apple Developer account details for committed release/distribution signing.
 2. Supabase project.
 3. RevenueCat project.
 4. Production AI provider accounts.
@@ -111,4 +113,4 @@ Phase 2A reliable local audio capture is implemented and verified locally. Phase
 
 ## Next Milestone
 
-Phase 2A satisfies its local audio capture exit criteria after commit and push. Next milestone requires explicit Phase 2B approval.
+Phase 2A satisfies its local audio capture exit criteria and the device signing fix is verified. Next milestone requires explicit Phase 2B approval.

@@ -256,3 +256,18 @@
 1. Recovery metadata includes session ID, source ID, file URL, start date, accumulated duration, pause state, markers, last update, and interruption reason.
 2. Relaunch can surface an interrupted recording when metadata exists.
 3. Production persistence can later migrate this metadata behind the same repository contract.
+
+## D-024: Device Debug signing without committed team ID
+
+**Date:** 2026-07-20
+
+**Decision:** Configure Xcode signing so physical `iphoneos` Debug builds can be automatically signed, while simulator builds remain unsigned for CI.
+
+**Reason:** Physical installation failed with `0xe800801c` because `Cura.app` was built with code signing disabled.
+
+**Consequences:**
+
+1. `CODE_SIGNING_ALLOWED` is enabled only for `iphoneos` and disabled for `iphonesimulator`.
+2. `CODE_SIGN_STYLE` is Automatic and `CODE_SIGN_IDENTITY` is Apple Development.
+3. No personal `DEVELOPMENT_TEAM` is committed; local device builds can supply the team through Xcode selection or command-line override.
+4. `CuraCore.framework` is signed in device builds and signed again on embed through `CodeSignOnCopy`.
