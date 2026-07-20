@@ -271,3 +271,18 @@
 2. `CODE_SIGN_STYLE` is Automatic and `CODE_SIGN_IDENTITY` is Apple Development.
 3. No personal `DEVELOPMENT_TEAM` is committed; local device builds can supply the team through Xcode selection or command-line override.
 4. `CuraCore.framework` is signed in device builds and signed again on embed through `CodeSignOnCopy`.
+
+## D-025: Embedded framework install name
+
+**Date:** 2026-07-20
+
+**Decision:** Configure `CuraCore.framework` with an embedded-framework install name and configure `CuraApp` with explicit embedded-framework runpaths.
+
+**Reason:** Physical-device launch failed because `CuraCore.framework` advertised `/Library/Frameworks/CuraCore.framework/CuraCore`, but the framework is embedded inside `Cura.app/Frameworks`.
+
+**Consequences:**
+
+1. `CuraCore` now uses `INSTALL_PATH = @rpath`, `DYLIB_INSTALL_NAME_BASE = @rpath`, and `LD_DYLIB_INSTALL_NAME = @rpath/CuraCore.framework/CuraCore`.
+2. `CuraApp` now includes `@executable_path/Frameworks` and `@loader_path/Frameworks` in `LD_RUNPATH_SEARCH_PATHS`.
+3. The app continues to embed and sign `CuraCore.framework`.
+4. Product behavior is unchanged.

@@ -78,17 +78,22 @@ Phase 2A reliable local audio capture is implemented and verified locally. Phase
 9. Native scheme-level verification executed 19 unit tests and 2 UI tests with 0 failures.
 10. Device Debug build for connected iPhone `00008150-001643EA0C3A401C` passes when the local development team is supplied outside committed source.
 11. `Cura.app` and embedded `CuraCore.framework` pass `codesign` verification.
+12. `otool -D` verifies embedded `CuraCore.framework` uses `@rpath/CuraCore.framework/CuraCore`.
+13. `otool -L` verifies `Cura.app/Cura` links `CuraCore` through `@rpath`.
+14. Clean device build and device install pass for connected iPhone `00008150-001643EA0C3A401C`.
 
 ## Blocked
 
-1. Apple Developer account details for committed release/distribution signing.
-2. Supabase project.
-3. RevenueCat project.
-4. Production AI provider accounts.
-5. Final domain and support email.
-6. Trademark clearance.
-7. Legal review.
-8. Final pricing after cost tests.
+1. Direct `devicectl` launch confirmation did not return a normal launch-completion record in this session, although it no longer reports the prior dyld framework-load error.
+2. Physical-device UI-test launch is blocked by the test runner identifier `com.visionbuilt.cura.uitests.xctrunner` not being found on device.
+3. Apple Developer account details for committed release/distribution signing.
+4. Supabase project.
+5. RevenueCat project.
+6. Production AI provider accounts.
+7. Final domain and support email.
+8. Trademark clearance.
+9. Legal review.
+10. Final pricing after cost tests.
 
 ## Deferred
 
@@ -113,4 +118,4 @@ Phase 2A reliable local audio capture is implemented and verified locally. Phase
 
 ## Next Milestone
 
-Phase 2A satisfies its local audio capture exit criteria and the device signing fix is verified. Next milestone requires explicit Phase 2B approval.
+Phase 2A satisfies its local audio capture exit criteria. Device signing and runtime framework linking are fixed at the build artifact level; final manual foreground launch confirmation on the physical iPhone remains the next immediate check before Phase 2B approval.

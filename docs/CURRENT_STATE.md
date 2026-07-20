@@ -67,6 +67,8 @@ Verification on 2026-07-20:
 14. Phase 2A commit is pushed to `origin/main`.
 15. Device Debug signing is configured for automatic iPhone signing without committing a personal Team ID.
 16. `CuraCore.framework` remains embedded with `CodeSignOnCopy` and is signed in device builds.
+17. `CuraCore.framework` uses an embedded-framework install name of `@rpath/CuraCore.framework/CuraCore`.
+18. `CuraApp` uses embedded-framework runpaths for `@executable_path/Frameworks` and `@loader_path/Frameworks`.
 
 No cloud upload, transcription, AI generation, Supabase, RevenueCat, authentication, or Phase 2B work has started.
 
@@ -80,3 +82,15 @@ Signing verification on 2026-07-20:
 6. `codesign --verify --deep --strict --verbose=4` passed for the built `Cura.app`.
 7. `codesign --verify --strict --verbose=4` passed for embedded `CuraCore.framework`.
 8. Simulator scheme tests passed again on iPhone 17 Pro, iOS 26.5, UDID `0001DB82-B759-4301-AB9C-F79DC34B9867`.
+
+Runtime-linking verification on 2026-07-20:
+
+1. Root cause of the physical-launch dyld failure was `CuraCore.framework` resolving `LD_DYLIB_INSTALL_NAME` to `/Library/Frameworks/CuraCore.framework/CuraCore`.
+2. `otool -D` on the embedded framework now reports `@rpath/CuraCore.framework/CuraCore`.
+3. `otool -L` on `Cura.app/Cura` now links `@rpath/CuraCore.framework/CuraCore`.
+4. Clean device build from `/tmp/cura-device-deriveddata` succeeded for connected iPhone `00008150-001643EA0C3A401C`.
+5. `Cura.app/Frameworks/CuraCore.framework/CuraCore` exists in the rebuilt app bundle.
+6. `codesign` verification passed for both the rebuilt app and embedded framework.
+7. `xcrun devicectl device install app` installed `com.visionbuilt.cura` successfully on the connected iPhone.
+8. Direct `devicectl` launch probes no longer report the prior dyld framework-load error, but the tool did not return a normal launch-completion record in this session.
+9. A focused physical-device UI-test attempt was blocked by the test runner identifier `com.visionbuilt.cura.uitests.xctrunner` not being found; this was not a Cura app dyld failure.
