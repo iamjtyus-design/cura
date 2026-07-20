@@ -1,0 +1,11 @@
+.DS_Store
+.build/
+build/
+DerivedData/
+*.xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcresult
+.env
+config/.env
+*.p8
+*.mobileprovision

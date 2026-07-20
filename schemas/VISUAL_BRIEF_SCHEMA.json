@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://visionbuilt.example/schemas/visual-brief-1.0.json",
+  "title": "CURA Visual Brief",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "session_id",
+    "curated_note_id",
+    "layout_type",
+    "title",
+    "theme_key",
+    "density",
+    "page_format",
+    "orientation",
+    "sections"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "session_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "curated_note_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "layout_type": {
+      "enum": [
+        "one_page_summary",
+        "timeline",
+        "process_map",
+        "concept_map",
+        "comparison",
+        "quote_layout",
+        "key_statistics",
+        "carousel_plan"
+      ]
+    },
+    "title": {
+      "type": "string"
+    },
+    "subtitle": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "theme_key": {
+      "type": "string"
+    },
+    "density": {
+      "enum": [
+        "compact",
+        "balanced",
+        "spacious"
+      ]
+    },
+    "page_format": {
+      "type": "string"
+    },
+    "orientation": {
+      "enum": [
+        "portrait",
+        "landscape",
+        "square"
+      ]
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "section_id",
+          "section_type",
+          "headline",
+          "order",
+          "is_editable",
+          "is_visible",
+          "evidence_references"
+        ],
+        "properties": {
+          "section_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "section_type": {
+            "enum": [
+              "summary",
+              "key_point",
+              "quote",
+              "statistic",
+              "timeline_event",
+              "process_step",
+              "concept",
+              "comparison_item",
+              "action_item",
+              "decision",
+              "risk",
+              "question",
+              "source",
+              "visual_observation",
+              "callout"
+            ]
+          },
+          "headline": {
+            "type": "string"
+          },
+          "body": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "items": {
+            "type": "array"
+          },
+          "order": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "priority": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "style_variant": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "is_editable": {
+            "type": "boolean"
+          },
+          "is_visible": {
+            "type": "boolean"
+          },
+          "evidence_references": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source_id",
+                "confidence"
+              ],
+              "properties": {
+                "source_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "start_ms": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "end_ms": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "frame_timestamp_ms": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "page_number": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "text_range": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "evidence_text": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "confidence": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

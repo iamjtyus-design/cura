@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-test-and-scan:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Secret scan
+        run: sh scripts/secret_scan.sh
+      - name: Swift package tests
+        run: swift test
+      - name: Phase 0 smoke tests
+        run: swift run CuraSmokeTests
+      - name: Native iOS app build
+        run: xcodebuild -project Cura.xcodeproj -target CuraApp -sdk iphonesimulator build
+      - name: Native iOS unit test bundle build
+        run: xcodebuild -project Cura.xcodeproj -target CuraTests -sdk iphonesimulator build
+      - name: Native iOS UI test bundle build
+        run: xcodebuild -project Cura.xcodeproj -target CuraUITests -sdk iphonesimulator build

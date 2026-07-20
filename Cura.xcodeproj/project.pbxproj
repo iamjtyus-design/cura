@@ -1,0 +1,302 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		100000000000000000000101 /* AppConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000001 /* AppConfiguration.swift */; };
+		100000000000000000000102 /* DependencyContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000002 /* DependencyContainer.swift */; };
+		100000000000000000000103 /* DomainModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000003 /* DomainModels.swift */; };
+		100000000000000000000104 /* PersistenceProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000004 /* PersistenceProtocols.swift */; };
+		100000000000000000000105 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000005 /* DesignTokens.swift */; };
+		100000000000000000000106 /* MockProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000006 /* MockProviders.swift */; };
+		100000000000000000000107 /* ProviderProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000007 /* ProviderProtocols.swift */; };
+		100000000000000000000108 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000008 /* AppCoordinator.swift */; };
+		100000000000000000000109 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000009 /* ContentView.swift */; };
+		100000000000000000000110 /* CuraApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000010 /* CuraApp.swift */; };
+		100000000000000000000111 /* CuraCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 100000000000000000000020 /* CuraCore.framework */; };
+		100000000000000000000112 /* CuraCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 100000000000000000000020 /* CuraCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		100000000000000000000113 /* DomainModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000013 /* DomainModelTests.swift */; };
+		100000000000000000000114 /* DependencyContainerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000014 /* DependencyContainerTests.swift */; };
+		100000000000000000000115 /* CuraCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 100000000000000000000020 /* CuraCore.framework */; };
+		100000000000000000000116 /* CuraUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000015 /* CuraUITests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		100000000000000000000201 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 100000000000000000000300 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 100000000000000000000401;
+			remoteInfo = CuraCore;
+		};
+		100000000000000000000202 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 100000000000000000000300 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 100000000000000000000402;
+			remoteInfo = CuraApp;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		100000000000000000000501 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				100000000000000000000112 /* CuraCore.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		100000000000000000000001 /* AppConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfiguration.swift; sourceTree = "<group>"; };
+		100000000000000000000002 /* DependencyContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyContainer.swift; sourceTree = "<group>"; };
+		100000000000000000000003 /* DomainModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainModels.swift; sourceTree = "<group>"; };
+		100000000000000000000004 /* PersistenceProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceProtocols.swift; sourceTree = "<group>"; };
+		100000000000000000000005 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
+		100000000000000000000006 /* MockProviders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockProviders.swift; sourceTree = "<group>"; };
+		100000000000000000000007 /* ProviderProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderProtocols.swift; sourceTree = "<group>"; };
+		100000000000000000000008 /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
+		100000000000000000000009 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		100000000000000000000010 /* CuraApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CuraApp.swift; sourceTree = "<group>"; };
+		100000000000000000000011 /* Development.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Development.xcconfig; sourceTree = "<group>"; };
+		100000000000000000000012 /* Staging.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Staging.xcconfig; sourceTree = "<group>"; };
+		100000000000000000000013 /* DomainModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainModelTests.swift; sourceTree = "<group>"; };
+		100000000000000000000014 /* DependencyContainerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyContainerTests.swift; sourceTree = "<group>"; };
+		100000000000000000000015 /* CuraUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CuraUITests.swift; sourceTree = "<group>"; };
+		100000000000000000000016 /* Production.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Production.xcconfig; sourceTree = "<group>"; };
+		100000000000000000000020 /* CuraCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CuraCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		100000000000000000000021 /* Cura.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cura.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		100000000000000000000022 /* CuraTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CuraTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		100000000000000000000023 /* CuraUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CuraUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		100000000000000000000601 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		100000000000000000000602 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000111 /* CuraCore.framework in Frameworks */, ); runOnlyForDeploymentPostprocessing = 0; };
+		100000000000000000000603 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000115 /* CuraCore.framework in Frameworks */, ); runOnlyForDeploymentPostprocessing = 0; };
+		100000000000000000000604 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		100000000000000000000701 = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000702 /* Cura */,
+				100000000000000000000710 /* CuraTests */,
+				100000000000000000000711 /* CuraUITests */,
+				100000000000000000000703 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		100000000000000000000702 /* Cura */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000704 /* App */,
+				100000000000000000000705 /* Core */,
+				100000000000000000000708 /* DesignSystem */,
+				100000000000000000000709 /* Services */,
+			);
+			path = Cura;
+			sourceTree = "<group>";
+		};
+		100000000000000000000703 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000020 /* CuraCore.framework */,
+				100000000000000000000021 /* Cura.app */,
+				100000000000000000000022 /* CuraTests.xctest */,
+				100000000000000000000023 /* CuraUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		100000000000000000000704 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000008 /* AppCoordinator.swift */,
+				100000000000000000000009 /* ContentView.swift */,
+				100000000000000000000010 /* CuraApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		100000000000000000000705 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000706 /* Configuration */,
+				100000000000000000000707 /* Models */,
+				100000000000000000000712 /* Persistence */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		100000000000000000000706 /* Configuration */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000001 /* AppConfiguration.swift */,
+				100000000000000000000002 /* DependencyContainer.swift */,
+				100000000000000000000011 /* Development.xcconfig */,
+				100000000000000000000012 /* Staging.xcconfig */,
+				100000000000000000000016 /* Production.xcconfig */,
+			);
+			path = Configuration;
+			sourceTree = "<group>";
+		};
+		100000000000000000000707 /* Models */ = {
+			isa = PBXGroup;
+			children = (100000000000000000000003 /* DomainModels.swift */, );
+			path = Models;
+			sourceTree = "<group>";
+		};
+		100000000000000000000708 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (100000000000000000000005 /* DesignTokens.swift */, );
+			path = DesignSystem/Tokens;
+			sourceTree = "<group>";
+		};
+		100000000000000000000709 /* Services */ = {
+			isa = PBXGroup;
+			children = (100000000000000000000006 /* MockProviders.swift */, 100000000000000000000007 /* ProviderProtocols.swift */, );
+			path = Services/Processing;
+			sourceTree = "<group>";
+		};
+		100000000000000000000710 /* CuraTests */ = {
+			isa = PBXGroup;
+			children = (100000000000000000000013 /* DomainModelTests.swift */, 100000000000000000000014 /* DependencyContainerTests.swift */, );
+			path = CuraTests;
+			sourceTree = "<group>";
+		};
+		100000000000000000000711 /* CuraUITests */ = {
+			isa = PBXGroup;
+			children = (100000000000000000000015 /* CuraUITests.swift */, );
+			path = CuraUITests;
+			sourceTree = "<group>";
+		};
+		100000000000000000000712 /* Persistence */ = {
+			isa = PBXGroup;
+			children = (100000000000000000000004 /* PersistenceProtocols.swift */, );
+			path = Persistence;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		100000000000000000000401 /* CuraCore */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 100000000000000000001001 /* Build configuration list for PBXNativeTarget "CuraCore" */;
+			buildPhases = (100000000000000000000801 /* Sources */, 100000000000000000000601 /* Frameworks */, );
+			buildRules = ();
+			dependencies = ();
+			name = CuraCore;
+			productName = CuraCore;
+			productReference = 100000000000000000000020 /* CuraCore.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		100000000000000000000402 /* CuraApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 100000000000000000001002 /* Build configuration list for PBXNativeTarget "CuraApp" */;
+			buildPhases = (100000000000000000000802 /* Sources */, 100000000000000000000602 /* Frameworks */, 100000000000000000000501 /* Embed Frameworks */, );
+			buildRules = ();
+			dependencies = (100000000000000000000901 /* PBXTargetDependency */, );
+			name = CuraApp;
+			productName = Cura;
+			productReference = 100000000000000000000021 /* Cura.app */;
+			productType = "com.apple.product-type.application";
+		};
+		100000000000000000000403 /* CuraTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 100000000000000000001003 /* Build configuration list for PBXNativeTarget "CuraTests" */;
+			buildPhases = (100000000000000000000803 /* Sources */, 100000000000000000000603 /* Frameworks */, );
+			buildRules = ();
+			dependencies = (100000000000000000000902 /* PBXTargetDependency */, );
+			name = CuraTests;
+			productName = CuraTests;
+			productReference = 100000000000000000000022 /* CuraTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		100000000000000000000404 /* CuraUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 100000000000000000001004 /* Build configuration list for PBXNativeTarget "CuraUITests" */;
+			buildPhases = (100000000000000000000804 /* Sources */, 100000000000000000000604 /* Frameworks */, );
+			buildRules = ();
+			dependencies = (100000000000000000000903 /* PBXTargetDependency */, );
+			name = CuraUITests;
+			productName = CuraUITests;
+			productReference = 100000000000000000000023 /* CuraUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		100000000000000000000300 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2660;
+				LastUpgradeCheck = 2660;
+				TargetAttributes = {
+					100000000000000000000401 = {CreatedOnToolsVersion = 26.6; };
+					100000000000000000000402 = {CreatedOnToolsVersion = 26.6; };
+					100000000000000000000403 = {CreatedOnToolsVersion = 26.6; TestTargetID = 100000000000000000000401; };
+					100000000000000000000404 = {CreatedOnToolsVersion = 26.6; TestTargetID = 100000000000000000000402; };
+				};
+			};
+			buildConfigurationList = 100000000000000000001000 /* Build configuration list for PBXProject "Cura" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (en, Base, );
+			mainGroup = 100000000000000000000701;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 100000000000000000000703 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (100000000000000000000401 /* CuraCore */, 100000000000000000000402 /* CuraApp */, 100000000000000000000403 /* CuraTests */, 100000000000000000000404 /* CuraUITests */, );
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		100000000000000000000801 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000101, 100000000000000000000102, 100000000000000000000103, 100000000000000000000104, 100000000000000000000105, 100000000000000000000106, 100000000000000000000107, ); runOnlyForDeploymentPostprocessing = 0; };
+		100000000000000000000802 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000108, 100000000000000000000109, 100000000000000000000110, ); runOnlyForDeploymentPostprocessing = 0; };
+		100000000000000000000803 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000113, 100000000000000000000114, ); runOnlyForDeploymentPostprocessing = 0; };
+		100000000000000000000804 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000116, ); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		100000000000000000000901 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = 100000000000000000000401 /* CuraCore */; targetProxy = 100000000000000000000201 /* PBXContainerItemProxy */; };
+		100000000000000000000902 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = 100000000000000000000401 /* CuraCore */; targetProxy = 100000000000000000000201 /* PBXContainerItemProxy */; };
+		100000000000000000000903 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = 100000000000000000000402 /* CuraApp */; targetProxy = 100000000000000000000202 /* PBXContainerItemProxy */; };
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		100000000000000000001101 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ANALYZER_NONNULL = YES; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; CLANG_ENABLE_OBJC_WEAK = YES; CLANG_WARN_DOCUMENTATION_COMMENTS = YES; CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES; CODE_SIGNING_ALLOWED = NO; COPY_PHASE_STRIP = NO; DEBUG_INFORMATION_FORMAT = dwarf; ENABLE_STRICT_OBJC_MSGSEND = YES; ENABLE_TESTABILITY = YES; GCC_C_LANGUAGE_STANDARD = gnu17; GCC_DYNAMIC_NO_PIC = NO; GCC_NO_COMMON_BLOCKS = YES; GCC_OPTIMIZATION_LEVEL = 0; GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1", "$(inherited)", ); IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE; ONLY_ACTIVE_ARCH = YES; SDKROOT = iphoneos; SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG; SWIFT_VERSION = 6.0; }; name = Debug; };
+		100000000000000000001102 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ANALYZER_NONNULL = YES; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; CLANG_ENABLE_OBJC_WEAK = YES; CLANG_WARN_DOCUMENTATION_COMMENTS = YES; CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES; CODE_SIGNING_ALLOWED = NO; COPY_PHASE_STRIP = NO; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; ENABLE_NS_ASSERTIONS = NO; ENABLE_STRICT_OBJC_MSGSEND = YES; GCC_C_LANGUAGE_STANDARD = gnu17; GCC_NO_COMMON_BLOCKS = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; MTL_ENABLE_DEBUG_INFO = NO; SDKROOT = iphoneos; SWIFT_COMPILATION_MODE = wholemodule; SWIFT_VERSION = 6.0; VALIDATE_PRODUCT = YES; }; name = Release; };
+		100000000000000000001201 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; DEFINES_MODULE = YES; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = CuraCore; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura.core; PRODUCT_NAME = "$(TARGET_NAME)"; SKIP_INSTALL = YES; SWIFT_VERSION = 6.0; }; name = Debug; };
+		100000000000000000001202 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; DEFINES_MODULE = YES; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = CuraCore; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura.core; PRODUCT_NAME = "$(TARGET_NAME)"; SKIP_INSTALL = YES; SWIFT_VERSION = 6.0; }; name = Release; };
+		100000000000000000001301 /* Debug */ = {isa = XCBuildConfiguration; baseConfigurationReference = 100000000000000000000011 /* Development.xcconfig */; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = CURA; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura; PRODUCT_NAME = Cura; SWIFT_VERSION = 6.0; }; name = Debug; };
+		100000000000000000001302 /* Release */ = {isa = XCBuildConfiguration; baseConfigurationReference = 100000000000000000000016 /* Production.xcconfig */; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = CURA; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura; PRODUCT_NAME = Cura; SWIFT_VERSION = 6.0; }; name = Release; };
+		100000000000000000001401 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura.tests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 6.0; TEST_TARGET_NAME = CuraCore; }; name = Debug; };
+		100000000000000000001402 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura.tests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 6.0; TEST_TARGET_NAME = CuraCore; }; name = Release; };
+		100000000000000000001501 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 6.0; TEST_TARGET_NAME = CuraApp; }; name = Debug; };
+		100000000000000000001502 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = 1; PRODUCT_BUNDLE_IDENTIFIER = com.visionbuilt.cura.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 6.0; TEST_TARGET_NAME = CuraApp; }; name = Release; };
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		100000000000000000001000 /* Build configuration list for PBXProject "Cura" */ = {isa = XCConfigurationList; buildConfigurations = (100000000000000000001101 /* Debug */, 100000000000000000001102 /* Release */, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
+		100000000000000000001001 /* Build configuration list for PBXNativeTarget "CuraCore" */ = {isa = XCConfigurationList; buildConfigurations = (100000000000000000001201 /* Debug */, 100000000000000000001202 /* Release */, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
+		100000000000000000001002 /* Build configuration list for PBXNativeTarget "CuraApp" */ = {isa = XCConfigurationList; buildConfigurations = (100000000000000000001301 /* Debug */, 100000000000000000001302 /* Release */, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
+		100000000000000000001003 /* Build configuration list for PBXNativeTarget "CuraTests" */ = {isa = XCConfigurationList; buildConfigurations = (100000000000000000001401 /* Debug */, 100000000000000000001402 /* Release */, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
+		100000000000000000001004 /* Build configuration list for PBXNativeTarget "CuraUITests" */ = {isa = XCConfigurationList; buildConfigurations = (100000000000000000001501 /* Debug */, 100000000000000000001502 /* Release */, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
+/* End XCConfigurationList section */
+	};
+	rootObject = 100000000000000000000300 /* Project object */;
+}

@@ -1,0 +1,45 @@
+{
+  "name": "CURA",
+  "company": "VisionBuilt",
+  "meaning": "Capture. Understand. Refine. Activate.",
+  "primaryPromise": "Capture once. Create everything you need next.",
+  "platforms": {
+    "primary": "iOS",
+    "website": "marketing and waitlist",
+    "future": [
+      "Mission Control web",
+      "Android"
+    ]
+  },
+  "modes": [
+    "learn",
+    "create",
+    "work"
+  ],
+  "topLevelObject": "CaptureSession",
+  "canonicalProcessedObject": "CuratedNote",
+  "v1Boundaries": {
+    "professionalEditing": false,
+    "automaticPublishing": false,
+    "socialScheduling": false,
+    "missionControlDashboard": false,
+    "persistentCloudStorageByDefault": false
+  },
+  "firstVerticalSlice": {
+    "input": "video file",
+    "processing": "mock",
+    "result": [
+      "Curated Note",
+      "Creator Pack"
+    ],
+    "activation": [
+      "copy",
+      "copy and open Instagram",
+      "share sheet"
+    ],
+    "organization": [
+      "folder",
+      "favorite"
+    ]
+  }
+}
