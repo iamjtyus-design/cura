@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 1 first local, mock-driven vertical slice is implemented and verified locally. Phase 2 has not started.
+Phase 1 first local, mock-driven vertical slice is implemented and verified locally. Phase 1.1 architecture cleanup is in progress. Phase 2 has not started.
 
 ## Completed
 
@@ -50,6 +50,12 @@ Phase 1 first local, mock-driven vertical slice is implemented and verified loca
 42. Favorites.
 43. JSON-backed local library persistence for Phase 1 entities.
 44. UI test coverage for the primary Phase 1 flow and relaunch persistence.
+45. Phase 1 feature views split out of `ContentView.swift`.
+46. Repository contracts extended for Phase 1 persisted entities and media storage.
+47. `PhaseOneViewModel` refactored to use injected dependencies.
+48. Quick Send behavior moved behind `QuickSendProviding`.
+49. Phase 1 mock processing output creation moved behind `ProcessingProviding`.
+50. Focused Phase 1.1 view-model unit tests.
 
 ## Verification
 
@@ -57,11 +63,11 @@ Phase 1 first local, mock-driven vertical slice is implemented and verified loca
 2. `xcodebuild -project Cura.xcodeproj -target CuraApp -sdk iphonesimulator build` passes.
 3. `xcodebuild -project Cura.xcodeproj -target CuraTests -sdk iphonesimulator build` passes.
 4. `xcodebuild -project Cura.xcodeproj -target CuraUITests -sdk iphonesimulator build` passes.
-5. `swift test` passes 5 tests.
+5. `swift test` passes 11 tests.
 6. `swift run CuraSmokeTests` passes.
 7. `sh scripts/secret_scan.sh` passes.
 8. `xcodebuild -project Cura.xcodeproj -scheme CuraApp -destination 'id=0001DB82-B759-4301-AB9C-F79DC34B9867' test` passes.
-9. Native scheme-level verification executed 5 unit tests and 1 UI test with 0 failures.
+9. Native scheme-level verification executed 11 unit tests and 1 UI test with 0 failures.
 
 ## Blocked
 
@@ -94,4 +100,4 @@ Phase 1 first local, mock-driven vertical slice is implemented and verified loca
 
 ## Next Milestone
 
-Phase 1 satisfies its first local mock vertical-slice exit criteria after commit and push. Next milestone requires explicit Phase 2 approval.
+Phase 1.1 satisfies its architecture-cleanup exit criteria after commit and push. Next milestone requires explicit Phase 2 approval.

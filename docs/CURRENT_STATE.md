@@ -1,6 +1,6 @@
 # Current State
 
-Phase 1 first local, mock-driven vertical slice is implemented on top of the Phase 0 foundation.
+Phase 1 first local, mock-driven vertical slice is implemented on top of the Phase 0 foundation. Phase 1.1 architecture cleanup is in progress to preserve the same behavior with cleaner boundaries.
 
 Current foundation and Phase 1 slice:
 
@@ -33,6 +33,12 @@ Current foundation and Phase 1 slice:
 27. JSON-backed local library persistence for sessions, sources, folders, favorites, Curated Notes, Output Packs, and generated outputs.
 28. Unit coverage for JSON persistence.
 29. UI coverage for the primary import, process, favorite, copy, and relaunch-persistence flow.
+30. Phase 1 views split into focused feature files under `Cura/Features`.
+31. `ContentView.swift` reduced to composition and routing.
+32. `PhaseOneViewModel` now uses injected repositories and services from `DependencyContainer`.
+33. JSON persistence remains the local implementation behind repository and media-storage abstractions.
+34. Quick Send is behind `QuickSendProviding`.
+35. Phase 1 mock timing and Creator Pack creation are behind `ProcessingProviding`.
 
 Verification on 2026-07-20:
 
@@ -42,12 +48,13 @@ Verification on 2026-07-20:
 4. `xcodebuild -project Cura.xcodeproj -target CuraApp -sdk iphonesimulator build` passes.
 5. `xcodebuild -project Cura.xcodeproj -target CuraTests -sdk iphonesimulator build` passes.
 6. `xcodebuild -project Cura.xcodeproj -target CuraUITests -sdk iphonesimulator build` passes.
-7. `swift test` passes with 5 tests.
+7. `swift test` passes with 11 tests.
 8. `swift run CuraSmokeTests` passes.
 9. `sh scripts/secret_scan.sh` passes.
 10. `xcodebuild -project Cura.xcodeproj -scheme CuraApp -destination 'id=0001DB82-B759-4301-AB9C-F79DC34B9867' test` passes.
-11. Native scheme-level tests executed 5 unit tests and 1 UI test with 0 failures.
+11. Native scheme-level tests executed 11 unit tests and 1 UI test with 0 failures.
 12. Phase 0 commit is pushed to `origin/main`.
-13. Phase 1 changes are ready to commit and push after final repository checks.
+13. Phase 1 commit is pushed to `origin/main`.
+14. Phase 1.1 changes are ready for final verification, commit, and push.
 
 No Phase 2 work has started.

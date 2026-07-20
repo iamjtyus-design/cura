@@ -23,6 +23,16 @@
 		100000000000000000000114 /* DependencyContainerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000014 /* DependencyContainerTests.swift */; };
 		100000000000000000000115 /* CuraCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 100000000000000000000020 /* CuraCore.framework */; };
 		100000000000000000000116 /* CuraUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000015 /* CuraUITests.swift */; };
+		200000000000000000000101 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000001 /* HomeView.swift */; };
+		200000000000000000000102 /* SessionSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000002 /* SessionSetupView.swift */; };
+		200000000000000000000103 /* SessionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000003 /* SessionDetailView.swift */; };
+		200000000000000000000104 /* ProcessingStagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000004 /* ProcessingStagesView.swift */; };
+		200000000000000000000105 /* FolderComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000005 /* FolderComposer.swift */; };
+		200000000000000000000106 /* SessionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000006 /* SessionRow.swift */; };
+		200000000000000000000107 /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000007 /* ActivityView.swift */; };
+		200000000000000000000108 /* PhaseOneViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000008 /* PhaseOneViewModel.swift */; };
+		200000000000000000000109 /* PhaseOneProcessingStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000009 /* PhaseOneProcessingStage.swift */; };
+		200000000000000000000110 /* PhaseOneViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000010 /* PhaseOneViewModelTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -77,6 +87,16 @@
 		100000000000000000000021 /* Cura.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cura.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		100000000000000000000022 /* CuraTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CuraTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		100000000000000000000023 /* CuraUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CuraUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		200000000000000000000001 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		200000000000000000000002 /* SessionSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionSetupView.swift; sourceTree = "<group>"; };
+		200000000000000000000003 /* SessionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailView.swift; sourceTree = "<group>"; };
+		200000000000000000000004 /* ProcessingStagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingStagesView.swift; sourceTree = "<group>"; };
+		200000000000000000000005 /* FolderComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderComposer.swift; sourceTree = "<group>"; };
+		200000000000000000000006 /* SessionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRow.swift; sourceTree = "<group>"; };
+		200000000000000000000007 /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
+		200000000000000000000008 /* PhaseOneViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhaseOneViewModel.swift; sourceTree = "<group>"; };
+		200000000000000000000009 /* PhaseOneProcessingStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhaseOneProcessingStage.swift; sourceTree = "<group>"; };
+		200000000000000000000010 /* PhaseOneViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhaseOneViewModelTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +123,7 @@
 				100000000000000000000704 /* App */,
 				100000000000000000000705 /* Core */,
 				100000000000000000000708 /* DesignSystem */,
+				200000000000000000000700 /* Features */,
 				100000000000000000000709 /* Services */,
 			);
 			path = Cura;
@@ -171,7 +192,7 @@
 		};
 		100000000000000000000710 /* CuraTests */ = {
 			isa = PBXGroup;
-			children = (100000000000000000000013 /* DomainModelTests.swift */, 100000000000000000000014 /* DependencyContainerTests.swift */, );
+			children = (100000000000000000000013 /* DomainModelTests.swift */, 100000000000000000000014 /* DependencyContainerTests.swift */, 200000000000000000000010 /* PhaseOneViewModelTests.swift */, );
 			path = CuraTests;
 			sourceTree = "<group>";
 		};
@@ -185,6 +206,62 @@
 			isa = PBXGroup;
 			children = (100000000000000000000004 /* PersistenceProtocols.swift */, );
 			path = Persistence;
+			sourceTree = "<group>";
+		};
+		200000000000000000000700 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				200000000000000000000701 /* Home */,
+				200000000000000000000702 /* SessionSetup */,
+				200000000000000000000703 /* SessionDetail */,
+				200000000000000000000704 /* Processing */,
+				200000000000000000000705 /* Library */,
+				200000000000000000000706 /* QuickSend */,
+				200000000000000000000707 /* PhaseOne */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		200000000000000000000701 /* Home */ = {
+			isa = PBXGroup;
+			children = (200000000000000000000001 /* HomeView.swift */, );
+			path = Home;
+			sourceTree = "<group>";
+		};
+		200000000000000000000702 /* SessionSetup */ = {
+			isa = PBXGroup;
+			children = (200000000000000000000002 /* SessionSetupView.swift */, );
+			path = SessionSetup;
+			sourceTree = "<group>";
+		};
+		200000000000000000000703 /* SessionDetail */ = {
+			isa = PBXGroup;
+			children = (200000000000000000000003 /* SessionDetailView.swift */, );
+			path = SessionDetail;
+			sourceTree = "<group>";
+		};
+		200000000000000000000704 /* Processing */ = {
+			isa = PBXGroup;
+			children = (200000000000000000000004 /* ProcessingStagesView.swift */, );
+			path = Processing;
+			sourceTree = "<group>";
+		};
+		200000000000000000000705 /* Library */ = {
+			isa = PBXGroup;
+			children = (200000000000000000000005 /* FolderComposer.swift */, 200000000000000000000006 /* SessionRow.swift */, );
+			path = Library;
+			sourceTree = "<group>";
+		};
+		200000000000000000000706 /* QuickSend */ = {
+			isa = PBXGroup;
+			children = (200000000000000000000007 /* ActivityView.swift */, );
+			path = QuickSend;
+			sourceTree = "<group>";
+		};
+		200000000000000000000707 /* PhaseOne */ = {
+			isa = PBXGroup;
+			children = (200000000000000000000008 /* PhaseOneViewModel.swift */, 200000000000000000000009 /* PhaseOneProcessingStage.swift */, );
+			path = PhaseOne;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -265,9 +342,9 @@
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		100000000000000000000801 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000101, 100000000000000000000102, 100000000000000000000103, 100000000000000000000104, 100000000000000000000105, 100000000000000000000106, 100000000000000000000107, ); runOnlyForDeploymentPostprocessing = 0; };
+		100000000000000000000801 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000101, 100000000000000000000102, 100000000000000000000103, 100000000000000000000104, 100000000000000000000105, 100000000000000000000106, 100000000000000000000107, 200000000000000000000101, 200000000000000000000102, 200000000000000000000103, 200000000000000000000104, 200000000000000000000105, 200000000000000000000106, 200000000000000000000107, 200000000000000000000108, 200000000000000000000109, ); runOnlyForDeploymentPostprocessing = 0; };
 		100000000000000000000802 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000108, 100000000000000000000109, 100000000000000000000110, ); runOnlyForDeploymentPostprocessing = 0; };
-		100000000000000000000803 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000113, 100000000000000000000114, ); runOnlyForDeploymentPostprocessing = 0; };
+		100000000000000000000803 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000113, 100000000000000000000114, 200000000000000000000110, ); runOnlyForDeploymentPostprocessing = 0; };
 		100000000000000000000804 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000116, ); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 

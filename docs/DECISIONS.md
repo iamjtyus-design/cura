@@ -187,3 +187,44 @@
 1. Clipboard writes happen only after explicit user action.
 2. No content is published by CURA.
 3. The activation path remains mock/local and user-controlled.
+
+## D-020: Phase 1.1 feature boundaries
+
+**Date:** 2026-07-20
+
+**Decision:** Split the Phase 1 vertical slice into feature files under `Cura/Features` and keep `ContentView.swift` as the routing/composition entry point.
+
+**Reason:** The Phase 1 implementation worked, but the view file had grown too large for maintainable Phase 2 work.
+
+**Alternatives considered:**
+
+1. Leave the vertical slice in `ContentView.swift`.
+2. Move the entire app flow into a single coordinator.
+3. Start Phase 2 before cleaning the Phase 1 structure.
+
+**Consequences:**
+
+1. User-visible behavior remains unchanged.
+2. Phase 2 can build on focused Home, Session Setup, Session Detail, Processing, Library, Quick Send, and Phase One files.
+3. The native Xcode project now explicitly includes the new feature files.
+
+## D-021: Phase 1.1 dependency boundary
+
+**Date:** 2026-07-20
+
+**Decision:** Route Phase 1 persistence, media storage, mock processing, and Quick Send through `DependencyContainer` protocols.
+
+**Reason:** `PhaseOneViewModel` should orchestrate the flow without constructing `JSONLocalLibraryStore` or owning clipboard/open-app behavior directly.
+
+**Alternatives considered:**
+
+1. Keep direct JSON store construction inside the view model.
+2. Introduce production persistence before Phase 2.
+3. Move Quick Send into SwiftUI views.
+
+**Consequences:**
+
+1. `JSONLocalLibraryStore` remains the local Phase 1 implementation behind repository and media-storage abstractions.
+2. Mock processing timing and Creator Pack creation are owned by `ProcessingProviding`.
+3. Clipboard and Instagram fallback behavior are owned by `QuickSendProviding`.
+4. Live AI, Supabase, RevenueCat, authentication, paid services, audio recording, video editing, and automatic publishing remain unstarted.
