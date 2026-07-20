@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 0 foundation is implemented locally.
+Phase 0 foundation is implemented and pushed to GitHub.
 
 ## Completed
 
@@ -35,6 +35,8 @@ Phase 0 foundation is implemented locally.
 27. Phase 0 smoke-test executable.
 28. Unit tests.
 29. UI test target.
+30. Native scheme-level test verification.
+31. Push to `origin/main`.
 
 ## Verification
 
@@ -45,19 +47,19 @@ Phase 0 foundation is implemented locally.
 5. `swift test` passes 4 tests.
 6. `swift run CuraSmokeTests` passes.
 7. `sh scripts/secret_scan.sh` passes.
+8. `xcodebuild -project Cura.xcodeproj -scheme CuraApp -destination 'id=0001DB82-B759-4301-AB9C-F79DC34B9867' test` passes.
+9. Native scheme-level verification executed 4 unit tests and 1 UI test with 0 failures.
 
 ## Blocked
 
-1. Running native simulator unit/UI tests through the `CuraApp` scheme is blocked by local SDK/runtime mismatch: Xcode has iOS Simulator SDK 26.5, while CoreSimulator only lists iOS 27.0 devices.
-2. Push to GitHub is blocked until a Git remote is configured, unless one is added before the push attempt.
-3. Apple Developer account details.
-4. Supabase project.
-5. RevenueCat project.
-6. Production AI provider accounts.
-7. Final domain and support email.
-8. Trademark clearance.
-9. Legal review.
-10. Final pricing after cost tests.
+1. Apple Developer account details.
+2. Supabase project.
+3. RevenueCat project.
+4. Production AI provider accounts.
+5. Final domain and support email.
+6. Trademark clearance.
+7. Legal review.
+8. Final pricing after cost tests.
 
 ## Deferred
 
@@ -76,4 +78,4 @@ Phase 0 foundation is implemented locally.
 
 ## Next Milestone
 
-Resolve the simulator runtime mismatch and run native scheme tests before approving Phase 1.
+Phase 0 satisfies its foundation exit criteria. Next milestone is Phase 1 only after explicit approval.

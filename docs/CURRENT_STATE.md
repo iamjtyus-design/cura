@@ -24,7 +24,7 @@ Current foundation:
 Verification on 2026-07-20:
 
 1. Xcode version: Xcode 26.6, build 17F113.
-2. Available CoreSimulator runtime: iOS 27.0.
+2. Simulator used: iPhone 17 Pro, iOS 26.5, UDID `0001DB82-B759-4301-AB9C-F79DC34B9867`.
 3. Installed iOS/iOS Simulator SDK: 26.5.
 4. `xcodebuild -project Cura.xcodeproj -target CuraApp -sdk iphonesimulator build` passes.
 5. `xcodebuild -project Cura.xcodeproj -target CuraTests -sdk iphonesimulator build` passes.
@@ -32,6 +32,8 @@ Verification on 2026-07-20:
 7. `swift test` passes with 4 tests.
 8. `swift run CuraSmokeTests` passes.
 9. `sh scripts/secret_scan.sh` passes.
-10. `xcodebuild ... -scheme CuraApp -destination 'platform=iOS Simulator,name=iPhone 17 Pro' test` is blocked because Xcode has SDK 26.5 while the only available iOS simulator runtime is 27.0.
+10. `xcodebuild -project Cura.xcodeproj -scheme CuraApp -destination 'id=0001DB82-B759-4301-AB9C-F79DC34B9867' test` passes.
+11. Native scheme-level tests executed 4 unit tests and 1 UI test with 0 failures.
+12. Phase 0 commit is pushed to `origin/main`.
 
 No Phase 1 work has started.

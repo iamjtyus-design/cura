@@ -17,9 +17,5 @@ jobs:
         run: swift test
       - name: Phase 0 smoke tests
         run: swift run CuraSmokeTests
-      - name: Native iOS app build
-        run: xcodebuild -project Cura.xcodeproj -target CuraApp -sdk iphonesimulator build
-      - name: Native iOS unit test bundle build
-        run: xcodebuild -project Cura.xcodeproj -target CuraTests -sdk iphonesimulator build
-      - name: Native iOS UI test bundle build
-        run: xcodebuild -project Cura.xcodeproj -target CuraUITests -sdk iphonesimulator build
+      - name: Native iOS scheme tests
+        run: xcodebuild -project Cura.xcodeproj -scheme CuraApp -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.5' test

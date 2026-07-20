@@ -110,7 +110,7 @@
 3. Live AI, Supabase, RevenueCat, and production persistence remain deferred.
 4. Running native scheme tests still requires a compatible simulator runtime.
 
-## D-016: CI uses target builds until simulator runtime is stable
+## D-016: CI target-build workaround before simulator runtime was stable
 
 **Date:** 2026-07-20
 
@@ -127,3 +127,23 @@
 
 1. CI still verifies compilation of the native app and test bundles.
 2. Full simulator execution remains the next verification task.
+3. Superseded by D-017 after the iOS 26.5 simulator runtime became available.
+
+## D-017: Phase 0 scheme-level verification passed
+
+**Date:** 2026-07-20
+
+**Decision:** Treat Phase 0 foundation verification as complete after running the native `CuraApp` scheme tests on iPhone 17 Pro with iOS 26.5.
+
+**Reason:** The installed simulator runtime now matches the Xcode iOS Simulator SDK, and Xcode successfully executed both unit and UI tests through the native scheme.
+
+**Alternatives considered:**
+
+1. Keep Phase 0 blocked because earlier simulator runtime mismatch existed.
+2. Rely only on SwiftPM tests and target builds.
+
+**Consequences:**
+
+1. Phase 0 satisfies the build and test exit criteria.
+2. Phase 1 remains blocked until explicit user approval.
+3. CI can run the native scheme test command when a matching simulator is available.
