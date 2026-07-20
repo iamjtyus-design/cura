@@ -31,4 +31,39 @@ final class DependencyContainerTests: XCTestCase {
 
         XCTAssertEqual(String(decoding: data, as: UTF8.self), output.content)
     }
+
+    func testJSONLocalLibraryStorePersistsPhaseOneResults() async throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("cura-store-tests")
+            .appendingPathComponent(UUID().uuidString)
+        let store = JSONLocalLibraryStore(rootDirectory: root)
+        let session = CaptureSession(title: "Imported Video", mode: .create, status: .completed, isFavorite: true)
+        let note = CuratedNote(sessionID: session.id, title: session.title, smartSummary: "Mock note")
+        let output = GeneratedOutput(
+            sessionID: session.id,
+            curatedNoteID: note.id,
+            outputType: .creatorPack,
+            mode: .create,
+            packKey: "creator",
+            content: "Mock caption"
+        )
+        let pack = OutputPack(sessionID: session.id, curatedNoteID: note.id, packKey: "creator", mode: .create, outputs: [output])
+        let snapshot = CaptureLibrarySnapshot(
+            sessions: [session],
+            favorites: [Favorite(sessionID: session.id)],
+            curatedNotes: [note],
+            outputPacks: [pack],
+            generatedOutputs: [output]
+        )
+
+        try await store.save(snapshot)
+        let reloaded = try await JSONLocalLibraryStore(rootDirectory: root).load()
+
+        XCTAssertEqual(reloaded.sessions.first?.title, "Imported Video")
+        XCTAssertEqual(reloaded.curatedNotes.first?.smartSummary, "Mock note")
+        XCTAssertEqual(reloaded.generatedOutputs.first?.content, "Mock caption")
+        XCTAssertEqual(reloaded.favorites.first?.sessionID, session.id)
+
+        try await store.reset()
+    }
 }

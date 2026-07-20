@@ -147,3 +147,43 @@
 1. Phase 0 satisfies the build and test exit criteria.
 2. Phase 1 remains blocked until explicit user approval.
 3. CI can run the native scheme test command when a matching simulator is available.
+
+## D-018: Phase 1 local library uses JSON persistence
+
+**Date:** 2026-07-20
+
+**Decision:** Use a JSON-backed local library store under Application Support for the first mock-driven vertical slice.
+
+**Reason:** Phase 1 requires relaunch persistence for sessions, sources, folders, favorites, Curated Notes, Output Packs, and generated outputs, while production persistence and cloud services remain out of scope.
+
+**Alternatives considered:**
+
+1. Keep only in-memory repositories.
+2. Introduce SwiftData or Core Data immediately.
+3. Connect Supabase or another cloud database.
+
+**Consequences:**
+
+1. Phase 1 can prove the local-first flow and relaunch behavior without paid or live services.
+2. Imported videos are preserved locally in app storage.
+3. Production persistence remains a later migration decision.
+
+## D-019: Phase 1 social activation boundary
+
+**Date:** 2026-07-20
+
+**Decision:** Copy and Instagram handoff require an explicit user tap; if Instagram cannot open, CURA shows the iOS Share Sheet.
+
+**Reason:** The Constitution and Phase 1 scope prohibit automatic publishing and require user approval before anything leaves CURA.
+
+**Alternatives considered:**
+
+1. Automatically open Instagram after processing.
+2. Automatically publish or schedule generated content.
+3. Omit the Instagram handoff from Phase 1.
+
+**Consequences:**
+
+1. Clipboard writes happen only after explicit user action.
+2. No content is published by CURA.
+3. The activation path remains mock/local and user-controlled.

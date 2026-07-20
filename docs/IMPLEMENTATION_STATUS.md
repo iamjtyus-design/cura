@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 0 foundation is implemented and pushed to GitHub.
+Phase 1 first local, mock-driven vertical slice is implemented and verified locally. Phase 2 has not started.
 
 ## Completed
 
@@ -37,6 +37,19 @@ Phase 0 foundation is implemented and pushed to GitHub.
 29. UI test target.
 30. Native scheme-level test verification.
 31. Push to `origin/main`.
+32. Video import from Files into a local Capture Session.
+33. Local preservation of imported videos under Application Support media folders.
+34. Session setup for title, mode, folder, and processing mode.
+35. Local folder creation.
+36. Mock processing stage display.
+37. Mock Curated Note generation and persistence.
+38. Mock Creator Pack generation and persistence.
+39. Instagram Caption output display.
+40. Explicit Copy action.
+41. Explicit Copy and Open Instagram action with Share Sheet fallback.
+42. Favorites.
+43. JSON-backed local library persistence for Phase 1 entities.
+44. UI test coverage for the primary Phase 1 flow and relaunch persistence.
 
 ## Verification
 
@@ -44,11 +57,11 @@ Phase 0 foundation is implemented and pushed to GitHub.
 2. `xcodebuild -project Cura.xcodeproj -target CuraApp -sdk iphonesimulator build` passes.
 3. `xcodebuild -project Cura.xcodeproj -target CuraTests -sdk iphonesimulator build` passes.
 4. `xcodebuild -project Cura.xcodeproj -target CuraUITests -sdk iphonesimulator build` passes.
-5. `swift test` passes 4 tests.
+5. `swift test` passes 5 tests.
 6. `swift run CuraSmokeTests` passes.
 7. `sh scripts/secret_scan.sh` passes.
 8. `xcodebuild -project Cura.xcodeproj -scheme CuraApp -destination 'id=0001DB82-B759-4301-AB9C-F79DC34B9867' test` passes.
-9. Native scheme-level verification executed 4 unit tests and 1 UI test with 0 failures.
+9. Native scheme-level verification executed 5 unit tests and 1 UI test with 0 failures.
 
 ## Blocked
 
@@ -75,7 +88,10 @@ Phase 0 foundation is implemented and pushed to GitHub.
 10. Supabase integration.
 11. RevenueCat integration.
 12. Production persistence.
+13. Audio recording.
+14. Video editing.
+15. Automatic publishing.
 
 ## Next Milestone
 
-Phase 0 satisfies its foundation exit criteria. Next milestone is Phase 1 only after explicit approval.
+Phase 1 satisfies its first local mock vertical-slice exit criteria after commit and push. Next milestone requires explicit Phase 2 approval.

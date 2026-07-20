@@ -1,8 +1,8 @@
 # Current State
 
-Phase 0 foundation is implemented and remains limited to architecture, models, mocks, configuration, tests, CI, and documentation.
+Phase 1 first local, mock-driven vertical slice is implemented on top of the Phase 0 foundation.
 
-Current foundation:
+Current foundation and Phase 1 slice:
 
 1. Git repository initialized.
 2. Native iOS Xcode project at `Cura.xcodeproj`.
@@ -20,6 +20,19 @@ Current foundation:
 14. Development, staging, and production environment configuration.
 15. CI workflow for secret scan, Swift tests, smoke tests, and native Xcode target builds.
 16. Local secret scanning script.
+17. Capture-first home screen with empty state.
+18. Video import from Files for real user files, plus a deterministic UI-test video path.
+19. Imported videos copied into app-local Application Support media folders.
+20. Local Capture Session setup for title, mode, folder, and processing mode.
+21. Local folders.
+22. Mock processing stages: Preparing, Reading Video, Building Curated Note, Creating Creator Pack.
+23. Persisted mock Curated Note and Creator Pack with Instagram Caption output.
+24. Explicit Copy and Copy and Open Instagram actions.
+25. Share Sheet fallback when Instagram cannot open.
+26. Favorites.
+27. JSON-backed local library persistence for sessions, sources, folders, favorites, Curated Notes, Output Packs, and generated outputs.
+28. Unit coverage for JSON persistence.
+29. UI coverage for the primary import, process, favorite, copy, and relaunch-persistence flow.
 
 Verification on 2026-07-20:
 
@@ -29,11 +42,12 @@ Verification on 2026-07-20:
 4. `xcodebuild -project Cura.xcodeproj -target CuraApp -sdk iphonesimulator build` passes.
 5. `xcodebuild -project Cura.xcodeproj -target CuraTests -sdk iphonesimulator build` passes.
 6. `xcodebuild -project Cura.xcodeproj -target CuraUITests -sdk iphonesimulator build` passes.
-7. `swift test` passes with 4 tests.
+7. `swift test` passes with 5 tests.
 8. `swift run CuraSmokeTests` passes.
 9. `sh scripts/secret_scan.sh` passes.
 10. `xcodebuild -project Cura.xcodeproj -scheme CuraApp -destination 'id=0001DB82-B759-4301-AB9C-F79DC34B9867' test` passes.
-11. Native scheme-level tests executed 4 unit tests and 1 UI test with 0 failures.
+11. Native scheme-level tests executed 5 unit tests and 1 UI test with 0 failures.
 12. Phase 0 commit is pushed to `origin/main`.
+13. Phase 1 changes are ready to commit and push after final repository checks.
 
-No Phase 1 work has started.
+No Phase 2 work has started.
