@@ -11,7 +11,10 @@ public struct DependencyContainer {
     public var outputPacks: any OutputPackRepository
     public var generatedOutputs: any GeneratedOutputRepository
     public var mediaStorage: any MediaFileStorage
+    public var audioRecovery: any AudioRecordingRecoveryRepository
     public var libraryMaintenance: (any LocalLibraryMaintenance)?
+    public var audioRecorder: any AudioRecordingProviding
+    public var audioPlayback: any AudioPlaybackProviding
     public var processing: any ProcessingProviding
     public var export: any ExportProviding
     public var quickSend: any QuickSendProviding
@@ -31,7 +34,10 @@ public struct DependencyContainer {
         outputPacks: any OutputPackRepository,
         generatedOutputs: any GeneratedOutputRepository,
         mediaStorage: any MediaFileStorage,
+        audioRecovery: any AudioRecordingRecoveryRepository,
         libraryMaintenance: (any LocalLibraryMaintenance)? = nil,
+        audioRecorder: any AudioRecordingProviding,
+        audioPlayback: any AudioPlaybackProviding,
         processing: any ProcessingProviding,
         export: any ExportProviding,
         quickSend: any QuickSendProviding,
@@ -50,7 +56,10 @@ public struct DependencyContainer {
         self.outputPacks = outputPacks
         self.generatedOutputs = generatedOutputs
         self.mediaStorage = mediaStorage
+        self.audioRecovery = audioRecovery
         self.libraryMaintenance = libraryMaintenance
+        self.audioRecorder = audioRecorder
+        self.audioPlayback = audioPlayback
         self.processing = processing
         self.export = export
         self.quickSend = quickSend
@@ -73,12 +82,22 @@ public struct DependencyContainer {
         make(configuration: .development, processingStageDelayNanoseconds: 10_000_000)
     }
 
+    public static var uiTesting: DependencyContainer {
+        makeLocalJSON(
+            configuration: .development,
+            audioRecorder: MockAudioRecordingProvider(),
+            audioPlayback: MockAudioPlaybackProvider()
+        )
+    }
+
     public static func make(
         configuration: AppConfiguration,
         seed: [CaptureSession] = [],
         processingStageDelayNanoseconds: UInt64 = 450_000_000,
         processingShouldFail: Bool = false,
-        quickSendShouldOpenInstagram: Bool = false
+        quickSendShouldOpenInstagram: Bool = false,
+        audioRecorder: (any AudioRecordingProviding)? = nil,
+        audioPlayback: (any AudioPlaybackProviding)? = nil
     ) -> DependencyContainer {
         let mediaStorage = InMemoryMediaFileStorage()
         return DependencyContainer(
@@ -92,7 +111,10 @@ public struct DependencyContainer {
             outputPacks: InMemoryOutputPackRepository(),
             generatedOutputs: InMemoryGeneratedOutputRepository(),
             mediaStorage: mediaStorage,
+            audioRecovery: InMemoryAudioRecordingRecoveryRepository(),
             libraryMaintenance: mediaStorage,
+            audioRecorder: audioRecorder ?? MockAudioRecordingProvider(),
+            audioPlayback: audioPlayback ?? MockAudioPlaybackProvider(),
             processing: MockProcessingProvider(
                 stageDelayNanoseconds: processingStageDelayNanoseconds,
                 shouldFail: processingShouldFail
@@ -106,10 +128,22 @@ public struct DependencyContainer {
         )
     }
 
-    public static func makeLocalJSON(configuration: AppConfiguration, rootDirectory: URL? = nil) -> DependencyContainer {
+    public static func makeLocalJSON(
+        configuration: AppConfiguration,
+        rootDirectory: URL? = nil,
+        audioRecorder: (any AudioRecordingProviding)? = nil,
+        audioPlayback: (any AudioPlaybackProviding)? = nil
+    ) -> DependencyContainer {
         let root = rootDirectory ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("CURA")
         let store = JSONLocalLibraryStore(rootDirectory: root)
+#if os(iOS)
+        let recorder = audioRecorder ?? AVFoundationAudioRecordingProvider()
+        let playback = audioPlayback ?? AVFoundationAudioPlaybackProvider()
+#else
+        let recorder = audioRecorder ?? MockAudioRecordingProvider()
+        let playback = audioPlayback ?? MockAudioPlaybackProvider()
+#endif
         return DependencyContainer(
             configuration: configuration,
             sessions: store,
@@ -121,7 +155,10 @@ public struct DependencyContainer {
             outputPacks: store,
             generatedOutputs: store,
             mediaStorage: store,
+            audioRecovery: store,
             libraryMaintenance: store,
+            audioRecorder: recorder,
+            audioPlayback: playback,
             processing: MockProcessingProvider(),
             export: MockExportProvider(),
             quickSend: MockQuickSendProvider(),

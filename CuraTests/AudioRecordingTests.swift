@@ -1,0 +1,141 @@
+import XCTest
+@testable import CuraCore
+
+@MainActor
+final class AudioRecordingTests: XCTestCase {
+    func testRecordingStateTransitions() {
+        var machine = AudioRecordingStateMachine()
+
+        XCTAssertTrue(machine.transition(to: .requestingPermission))
+        XCTAssertTrue(machine.transition(to: .ready))
+        XCTAssertTrue(machine.transition(to: .recording))
+        XCTAssertTrue(machine.transition(to: .paused))
+        XCTAssertTrue(machine.transition(to: .recording))
+        XCTAssertTrue(machine.transition(to: .stopping))
+        XCTAssertTrue(machine.transition(to: .completed))
+    }
+
+    func testPauseAndResume() async {
+        let model = AudioRecordingViewModel(container: .test)
+
+        await model.acceptConsentAndPrepare()
+        await model.startRecording()
+        await model.pauseRecording()
+        XCTAssertEqual(model.state, .paused)
+
+        await model.resumeRecording()
+        XCTAssertEqual(model.state, .recording)
+    }
+
+    func testStopAndSaveCreatesSessionAndSource() async throws {
+        let container = DependencyContainer.test
+        let model = AudioRecordingViewModel(container: container)
+
+        await model.acceptConsentAndPrepare()
+        await model.startRecording()
+        await model.addMarker()
+        await model.stopAndSave()
+
+        let session = try XCTUnwrap(model.savedSession)
+        let sources = try await container.sources.fetchSources(for: session.id)
+        XCTAssertEqual(model.state, .completed)
+        XCTAssertEqual(sources.first?.sourceType, .liveAudio)
+        XCTAssertEqual(sources.first?.mimeType, "audio/mp4")
+    }
+
+    func testPermissionDenialFailsClearly() async {
+        let container = DependencyContainer.make(
+            configuration: .development,
+            audioRecorder: MockAudioRecordingProvider(permission: .denied),
+            audioPlayback: MockAudioPlaybackProvider()
+        )
+        let model = AudioRecordingViewModel(container: container)
+
+        await model.acceptConsentAndPrepare()
+
+        XCTAssertEqual(model.state, .failed)
+        XCTAssertTrue(model.errorMessage.contains("denied"))
+    }
+
+    func testInterruptionPersistsRecoveryMetadata() async throws {
+        let container = DependencyContainer.test
+        let model = AudioRecordingViewModel(container: container)
+
+        await model.acceptConsentAndPrepare()
+        await model.startRecording()
+        await model.addMarker()
+        await model.handleInterruption(.headphonesDisconnected)
+
+        let fetchedRecovery = try await container.audioRecovery.fetch()
+        let recovery = try XCTUnwrap(fetchedRecovery)
+        XCTAssertEqual(model.state, .interrupted)
+        XCTAssertEqual(recovery.interruptionReason, .headphonesDisconnected)
+        XCTAssertEqual(recovery.markers.count, 1)
+    }
+
+    func testRecoveryMetadataLoadsAfterRelaunch() async throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("cura-audio-recovery")
+            .appendingPathComponent(UUID().uuidString)
+        let container = DependencyContainer.makeLocalJSON(
+            configuration: .development,
+            rootDirectory: root,
+            audioRecorder: MockAudioRecordingProvider(),
+            audioPlayback: MockAudioPlaybackProvider()
+        )
+        let model = AudioRecordingViewModel(container: container)
+        await model.acceptConsentAndPrepare()
+        await model.startRecording()
+        await model.handleInterruption(.appBackgrounded)
+
+        let relaunched = AudioRecordingViewModel(container: container)
+        await relaunched.load()
+
+        XCTAssertEqual(relaunched.state, .interrupted)
+        XCTAssertEqual(relaunched.recoveredMetadata?.interruptionReason, .appBackgrounded)
+        try await container.libraryMaintenance?.reset()
+    }
+
+    func testDeletionRemovesAudioSourceAndSession() async throws {
+        let container = DependencyContainer.test
+        let audioModel = AudioRecordingViewModel(container: container)
+        let libraryModel = PhaseOneViewModel(container: container, arguments: [])
+
+        await audioModel.acceptConsentAndPrepare()
+        await audioModel.startRecording()
+        await audioModel.stopAndSave()
+        await libraryModel.loadIfNeeded()
+
+        let session = try XCTUnwrap(audioModel.savedSession)
+        await libraryModel.deleteSession(session)
+
+        let deletedSession = try await container.sessions.fetch(id: session.id)
+        let deletedSources = try await container.sources.fetchSources(for: session.id)
+        XCTAssertNil(deletedSession)
+        XCTAssertTrue(deletedSources.isEmpty)
+    }
+
+    func testAudioSessionPersistsAfterRelaunch() async throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("cura-audio-persistence")
+            .appendingPathComponent(UUID().uuidString)
+        let container = DependencyContainer.makeLocalJSON(
+            configuration: .development,
+            rootDirectory: root,
+            audioRecorder: MockAudioRecordingProvider(),
+            audioPlayback: MockAudioPlaybackProvider()
+        )
+        let model = AudioRecordingViewModel(container: container)
+        await model.acceptConsentAndPrepare()
+        await model.startRecording()
+        await model.stopAndSave()
+
+        let libraryModel = PhaseOneViewModel(container: container, arguments: [])
+        await libraryModel.loadIfNeeded()
+
+        let session = try XCTUnwrap(model.savedSession)
+        XCTAssertEqual(libraryModel.sessions.first?.id, session.id)
+        XCTAssertEqual(libraryModel.audioSource(for: session.id)?.sourceType, .liveAudio)
+        try await container.libraryMaintenance?.reset()
+    }
+}

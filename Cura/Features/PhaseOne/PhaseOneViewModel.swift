@@ -17,9 +17,11 @@ public final class PhaseOneViewModel: ObservableObject {
     @Published public var completedStages: Set<PhaseOneProcessingStage> = []
     @Published public var errorMessage = ""
     @Published public var shareItem: ShareItem?
+    @Published public var showingAudioRecorder = false
 
     private var notesBySessionID: [UUID: CuratedNote] = [:]
     private var outputsBySessionID: [UUID: [GeneratedOutput]] = [:]
+    private var sourcesBySessionID: [UUID: [CaptureSource]] = [:]
     private var didLoad = false
     private let container: DependencyContainer
     private let isUITesting: Bool
@@ -150,6 +152,68 @@ public final class PhaseOneViewModel: ObservableObject {
         outputsBySessionID[sessionID]?.first { $0.outputType == .creatorPack }
     }
 
+    public func sources(for sessionID: UUID) -> [CaptureSource] {
+        sourcesBySessionID[sessionID, default: []]
+    }
+
+    public func audioSource(for sessionID: UUID) -> CaptureSource? {
+        sources(for: sessionID).first { $0.sourceType == .liveAudio || $0.sourceType == .uploadedAudio }
+    }
+
+    public func saveSessionMetadata(
+        _ session: CaptureSession,
+        title: String,
+        mode: CaptureMode,
+        folderID: UUID?,
+        processingMode: ProcessingMode
+    ) async {
+        var updated = session
+        updated.title = title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? session.title : title
+        updated.mode = mode
+        updated.folderID = folderID
+        updated.processingMode = processingMode
+        updated.updatedAt = Date()
+        do {
+            try await container.sessions.save(updated)
+            selectedSession = updated
+            await refreshPublishedState()
+        } catch {
+            errorMessage = "Session changes could not be saved."
+        }
+    }
+
+    public func deleteRecording(_ source: CaptureSource) async {
+        do {
+            if let url = source.sourceURL {
+                try await container.mediaStorage.deleteMedia(at: url)
+            }
+            try await container.sources.deleteSource(id: source.id)
+            await refreshPublishedState()
+        } catch {
+            errorMessage = "The recording could not be deleted."
+        }
+    }
+
+    public func deleteSession(_ session: CaptureSession) async {
+        do {
+            for source in try await container.sources.fetchSources(for: session.id) {
+                if let url = source.sourceURL {
+                    try await container.mediaStorage.deleteMedia(at: url)
+                }
+            }
+            try await container.sources.deleteSources(for: session.id)
+            try await container.sessions.delete(id: session.id)
+            selectedSession = nil
+            await refreshPublishedState()
+        } catch {
+            errorMessage = "The session could not be deleted."
+        }
+    }
+
+    public func refreshLibrary() async {
+        await refreshPublishedState()
+    }
+
     public func copy(_ text: String) async {
         await container.quickSend.copy(text)
     }
@@ -230,9 +294,11 @@ public final class PhaseOneViewModel: ObservableObject {
             folders = try await container.folders.fetchAll().sorted { $0.name < $1.name }
             notesBySessionID = [:]
             outputsBySessionID = [:]
+            sourcesBySessionID = [:]
             for session in sessions {
                 notesBySessionID[session.id] = try await container.curatedNotes.fetchNote(for: session.id)
                 outputsBySessionID[session.id] = try await container.generatedOutputs.fetchOutputs(for: session.id)
+                sourcesBySessionID[session.id] = try await container.sources.fetchSources(for: session.id)
             }
             if let selectedID = selectedSession?.id {
                 selectedSession = sessions.first { $0.id == selectedID }

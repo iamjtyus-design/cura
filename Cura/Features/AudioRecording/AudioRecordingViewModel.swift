@@ -1,0 +1,251 @@
+import Foundation
+import SwiftUI
+
+@MainActor
+public final class AudioRecordingViewModel: ObservableObject {
+    @Published public private(set) var state: AudioRecordingState = .idle
+    @Published public private(set) var markers: [AudioMarker] = []
+    @Published public private(set) var duration: TimeInterval = 0
+    @Published public private(set) var playbackDuration: TimeInterval = 0
+    @Published public private(set) var playbackPosition: TimeInterval = 0
+    @Published public private(set) var recoveredMetadata: AudioRecordingRecoveryMetadata?
+    @Published public private(set) var savedSession: CaptureSession?
+    @Published public private(set) var savedSource: CaptureSource?
+    @Published public var showConsentNotice = false
+    @Published public var errorMessage = ""
+
+    private var machine = AudioRecordingStateMachine()
+    private let container: DependencyContainer
+    private var activeSessionID: UUID?
+    private var activeSourceID: UUID?
+    private var activeFileURL: URL?
+    private var recordingStartDate: Date?
+
+    public var showingError: Binding<Bool> {
+        Binding(
+            get: { !self.errorMessage.isEmpty },
+            set: { if !$0 { self.errorMessage = "" } }
+        )
+    }
+
+    public init(container: DependencyContainer) {
+        self.container = container
+    }
+
+    public func load() async {
+        do {
+            recoveredMetadata = try await container.audioRecovery.fetch()
+            if let recoveredMetadata {
+                activeSessionID = recoveredMetadata.sessionID
+                activeSourceID = recoveredMetadata.sourceID
+                activeFileURL = recoveredMetadata.fileURL
+                recordingStartDate = recoveredMetadata.recordingStartDate
+                markers = recoveredMetadata.markers
+                duration = recoveredMetadata.accumulatedDuration
+                transition(to: .interrupted)
+            }
+        } catch {
+            errorMessage = "Recording recovery data could not be loaded."
+        }
+    }
+
+    public func recordTapped() async {
+        showConsentNotice = true
+    }
+
+    public func acceptConsentAndPrepare() async {
+        showConsentNotice = false
+        transition(to: .requestingPermission)
+        let status = await container.audioRecorder.requestPermission()
+        switch status {
+        case .granted:
+            transition(to: .ready)
+        case .denied:
+            transition(to: .failed)
+            errorMessage = "Microphone permission was denied. You can enable it in Settings."
+        case .restricted:
+            transition(to: .failed)
+            errorMessage = "Microphone access is restricted on this device."
+        case .undetermined:
+            transition(to: .failed)
+            errorMessage = "Microphone permission is still undecided."
+        }
+    }
+
+    public func startRecording() async {
+        do {
+            let sessionID = activeSessionID ?? UUID()
+            let sourceID = activeSourceID ?? UUID()
+            let url = try await container.mediaStorage.audioRecordingURL(sessionID: sessionID, sourceID: sourceID)
+            activeSessionID = sessionID
+            activeSourceID = sourceID
+            activeFileURL = url
+            recordingStartDate = recordingStartDate ?? Date()
+            try await container.audioRecorder.startRecording(to: url, configuration: AudioRecordingConfiguration())
+            transition(to: .recording)
+            await persistRecovery(reason: nil)
+        } catch CocoaError.fileWriteOutOfSpace {
+            transition(to: .failed)
+            errorMessage = "There is not enough storage to start recording."
+        } catch {
+            transition(to: .failed)
+            errorMessage = "Recording could not start."
+        }
+    }
+
+    public func pauseRecording() async {
+        guard state == .recording else { return }
+        do {
+            try await container.audioRecorder.pauseRecording()
+            duration = await container.audioRecorder.currentDuration()
+            transition(to: .paused)
+            await persistRecovery(reason: nil)
+        } catch {
+            transition(to: .failed)
+            errorMessage = "Recording could not pause."
+        }
+    }
+
+    public func resumeRecording() async {
+        guard state == .paused || state == .interrupted else { return }
+        do {
+            try await container.audioRecorder.resumeRecording()
+            transition(to: .recording)
+            await persistRecovery(reason: nil)
+        } catch {
+            transition(to: .failed)
+            errorMessage = "Recording could not resume."
+        }
+    }
+
+    public func addMarker() async {
+        let current = await container.audioRecorder.currentDuration()
+        markers.append(AudioMarker(time: current))
+        duration = current
+        await persistRecovery(reason: nil)
+    }
+
+    public func stopAndSave() async {
+        guard let sessionID = activeSessionID, let sourceID = activeSourceID, let fileURL = activeFileURL else { return }
+        transition(to: .stopping)
+        do {
+            let finalDuration = try await container.audioRecorder.stopRecording()
+            let title = "Audio Recording"
+            let session = CaptureSession(id: sessionID, title: title, mode: .learn, status: .ready)
+            let source = CaptureSource(
+                id: sourceID,
+                sessionID: sessionID,
+                sourceType: .liveAudio,
+                localIdentifier: fileURL.path,
+                originalFilename: fileURL.lastPathComponent,
+                mimeType: "audio/mp4",
+                duration: finalDuration,
+                sourceURL: fileURL,
+                transcriptOrigin: .unavailable
+            )
+            try await container.sessions.save(session)
+            try await container.sources.save(source)
+            try await container.audioRecovery.clear()
+            duration = finalDuration
+            savedSession = session
+            savedSource = source
+            transition(to: .completed)
+        } catch {
+            transition(to: .failed)
+            await persistRecovery(reason: .saveFailure)
+            errorMessage = "Recording could not be saved."
+        }
+    }
+
+    public func cancelRecording() async {
+        do {
+            try await container.audioRecorder.cancelRecording()
+            if let activeFileURL {
+                try await container.mediaStorage.deleteMedia(at: activeFileURL)
+            }
+            try await container.audioRecovery.clear()
+            resetLocalState()
+        } catch {
+            transition(to: .failed)
+            errorMessage = "Recording cancellation failed."
+        }
+    }
+
+    public func handleInterruption(_ reason: AudioRecordingInterruptionReason) async {
+        guard state == .recording || state == .paused else { return }
+        duration = await container.audioRecorder.currentDuration()
+        transition(to: .interrupted)
+        await persistRecovery(reason: reason)
+    }
+
+    public func recoverInterruptedRecording() async {
+        guard recoveredMetadata != nil else { return }
+        transition(to: .ready)
+    }
+
+    public func loadPlayback(url: URL) async {
+        do {
+            playbackDuration = try await container.audioPlayback.load(url: url)
+            playbackPosition = await container.audioPlayback.currentTime()
+        } catch {
+            errorMessage = "Recording playback could not be loaded."
+        }
+    }
+
+    public func play() async {
+        try? await container.audioPlayback.play()
+    }
+
+    public func pausePlayback() async {
+        await container.audioPlayback.pause()
+        playbackPosition = await container.audioPlayback.currentTime()
+    }
+
+    public func seek(to time: TimeInterval) async {
+        await container.audioPlayback.seek(to: time)
+        playbackPosition = await container.audioPlayback.currentTime()
+    }
+
+    private func persistRecovery(reason: AudioRecordingInterruptionReason?) async {
+        guard let sessionID = activeSessionID,
+              let sourceID = activeSourceID,
+              let activeFileURL,
+              let recordingStartDate else { return }
+        let metadata = AudioRecordingRecoveryMetadata(
+            sessionID: sessionID,
+            sourceID: sourceID,
+            fileURL: activeFileURL,
+            recordingStartDate: recordingStartDate,
+            accumulatedDuration: duration,
+            pauseState: state,
+            markers: markers,
+            lastSuccessfulStateUpdate: Date(),
+            interruptionReason: reason
+        )
+        try? await container.audioRecovery.save(metadata)
+        recoveredMetadata = metadata
+    }
+
+    private func transition(to nextState: AudioRecordingState) {
+        if machine.transition(to: nextState) {
+            state = machine.state
+        } else {
+            machine = AudioRecordingStateMachine(initialState: nextState)
+            state = nextState
+        }
+    }
+
+    private func resetLocalState() {
+        activeSessionID = nil
+        activeSourceID = nil
+        activeFileURL = nil
+        recordingStartDate = nil
+        markers = []
+        duration = 0
+        recoveredMetadata = nil
+        savedSession = nil
+        savedSource = nil
+        machine = AudioRecordingStateMachine()
+        state = .idle
+    }
+}

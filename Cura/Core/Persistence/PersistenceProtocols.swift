@@ -4,11 +4,14 @@ public protocol CaptureSessionRepository: Sendable {
     func save(_ session: CaptureSession) async throws
     func fetchAll() async throws -> [CaptureSession]
     func fetch(id: UUID) async throws -> CaptureSession?
+    func delete(id: UUID) async throws
 }
 
 public protocol CaptureSourceRepository: Sendable {
     func save(_ source: CaptureSource) async throws
     func fetchSources(for sessionID: UUID) async throws -> [CaptureSource]
+    func deleteSource(id: UUID) async throws
+    func deleteSources(for sessionID: UUID) async throws
 }
 
 public protocol FolderRepository: Sendable {
@@ -43,6 +46,12 @@ public protocol GeneratedOutputRepository: Sendable {
     func fetchOutputs(for sessionID: UUID) async throws -> [GeneratedOutput]
 }
 
+public protocol AudioRecordingRecoveryRepository: Sendable {
+    func save(_ metadata: AudioRecordingRecoveryMetadata) async throws
+    func fetch() async throws -> AudioRecordingRecoveryMetadata?
+    func clear() async throws
+}
+
 public struct StoredMediaFile: Equatable, Sendable {
     public var url: URL
     public var originalFilename: String
@@ -57,6 +66,8 @@ public struct StoredMediaFile: Equatable, Sendable {
 
 public protocol MediaFileStorage: Sendable {
     func copyImportedVideo(for sessionID: UUID, from sourceURL: URL) async throws -> StoredMediaFile
+    func audioRecordingURL(sessionID: UUID, sourceID: UUID) async throws -> URL
+    func deleteMedia(at url: URL) async throws
 }
 
 public protocol LocalLibraryMaintenance: Sendable {
@@ -71,6 +82,7 @@ public struct CaptureLibrarySnapshot: Codable, Equatable, Sendable {
     public var curatedNotes: [CuratedNote]
     public var outputPacks: [OutputPack]
     public var generatedOutputs: [GeneratedOutput]
+    public var audioRecovery: AudioRecordingRecoveryMetadata?
 
     public init(
         sessions: [CaptureSession] = [],
@@ -79,7 +91,8 @@ public struct CaptureLibrarySnapshot: Codable, Equatable, Sendable {
         favorites: [Favorite] = [],
         curatedNotes: [CuratedNote] = [],
         outputPacks: [OutputPack] = [],
-        generatedOutputs: [GeneratedOutput] = []
+        generatedOutputs: [GeneratedOutput] = [],
+        audioRecovery: AudioRecordingRecoveryMetadata? = nil
     ) {
         self.sessions = sessions
         self.sources = sources
@@ -88,6 +101,7 @@ public struct CaptureLibrarySnapshot: Codable, Equatable, Sendable {
         self.curatedNotes = curatedNotes
         self.outputPacks = outputPacks
         self.generatedOutputs = generatedOutputs
+        self.audioRecovery = audioRecovery
     }
 }
 
@@ -99,6 +113,7 @@ public actor JSONLocalLibraryStore:
     CuratedNoteRepository,
     OutputPackRepository,
     GeneratedOutputRepository,
+    AudioRecordingRecoveryRepository,
     MediaFileStorage,
     LocalLibraryMaintenance
 {
@@ -162,6 +177,20 @@ public actor JSONLocalLibraryStore:
         try await load().sessions.first { $0.id == id }
     }
 
+    public func delete(id: UUID) async throws {
+        var snapshot = try await load()
+        snapshot.sessions.removeAll { $0.id == id }
+        snapshot.sources.removeAll { $0.sessionID == id }
+        snapshot.favorites.removeAll { $0.sessionID == id }
+        snapshot.curatedNotes.removeAll { $0.sessionID == id }
+        snapshot.outputPacks.removeAll { $0.sessionID == id }
+        snapshot.generatedOutputs.removeAll { $0.sessionID == id }
+        if snapshot.audioRecovery?.sessionID == id {
+            snapshot.audioRecovery = nil
+        }
+        try await save(snapshot)
+    }
+
     public func save(_ source: CaptureSource) async throws {
         var snapshot = try await load()
         snapshot.sources.removeAll { $0.id == source.id }
@@ -171,6 +200,24 @@ public actor JSONLocalLibraryStore:
 
     public func fetchSources(for sessionID: UUID) async throws -> [CaptureSource] {
         try await load().sources.filter { $0.sessionID == sessionID }
+    }
+
+    public func deleteSource(id: UUID) async throws {
+        var snapshot = try await load()
+        snapshot.sources.removeAll { $0.id == id }
+        if snapshot.audioRecovery?.sourceID == id {
+            snapshot.audioRecovery = nil
+        }
+        try await save(snapshot)
+    }
+
+    public func deleteSources(for sessionID: UUID) async throws {
+        var snapshot = try await load()
+        snapshot.sources.removeAll { $0.sessionID == sessionID }
+        if snapshot.audioRecovery?.sessionID == sessionID {
+            snapshot.audioRecovery = nil
+        }
+        try await save(snapshot)
     }
 
     public func save(_ folder: Folder) async throws {
@@ -238,6 +285,22 @@ public actor JSONLocalLibraryStore:
         try await load().generatedOutputs.filter { $0.sessionID == sessionID }
     }
 
+    public func save(_ metadata: AudioRecordingRecoveryMetadata) async throws {
+        var snapshot = try await load()
+        snapshot.audioRecovery = metadata
+        try await save(snapshot)
+    }
+
+    public func fetch() async throws -> AudioRecordingRecoveryMetadata? {
+        try await load().audioRecovery
+    }
+
+    public func clear() async throws {
+        var snapshot = try await load()
+        snapshot.audioRecovery = nil
+        try await save(snapshot)
+    }
+
     public func copyImportedVideo(for sessionID: UUID, from sourceURL: URL) async throws -> StoredMediaFile {
         let didStartAccessing = sourceURL.startAccessingSecurityScopedResource()
         defer {
@@ -258,6 +321,17 @@ public actor JSONLocalLibraryStore:
             originalFilename: sourceURL.lastPathComponent,
             mimeType: "video/quicktime"
         )
+    }
+
+    public func audioRecordingURL(sessionID: UUID, sourceID: UUID) async throws -> URL {
+        let directory = try mediaDirectory(for: sessionID)
+        return directory.appendingPathComponent("\(sourceID.uuidString).m4a")
+    }
+
+    public func deleteMedia(at url: URL) async throws {
+        if FileManager.default.fileExists(atPath: url.path) {
+            try FileManager.default.removeItem(at: url)
+        }
     }
 }
 
@@ -281,6 +355,10 @@ public actor InMemoryCaptureSessionRepository: CaptureSessionRepository {
     public func fetch(id: UUID) async throws -> CaptureSession? {
         sessions[id]
     }
+
+    public func delete(id: UUID) async throws {
+        sessions.removeValue(forKey: id)
+    }
 }
 
 public actor InMemoryCaptureSourceRepository: CaptureSourceRepository {
@@ -297,6 +375,16 @@ public actor InMemoryCaptureSourceRepository: CaptureSourceRepository {
 
     public func fetchSources(for sessionID: UUID) async throws -> [CaptureSource] {
         sources[sessionID, default: []]
+    }
+
+    public func deleteSource(id: UUID) async throws {
+        for key in sources.keys {
+            sources[key]?.removeAll { $0.id == id }
+        }
+    }
+
+    public func deleteSources(for sessionID: UUID) async throws {
+        sources.removeValue(forKey: sessionID)
     }
 }
 
@@ -418,9 +506,41 @@ public actor InMemoryMediaFileStorage: MediaFileStorage, LocalLibraryMaintenance
         return StoredMediaFile(url: destination, originalFilename: sourceURL.lastPathComponent, mimeType: "video/quicktime")
     }
 
+    public func audioRecordingURL(sessionID: UUID, sourceID: UUID) async throws -> URL {
+        let directory = rootDirectory
+            .appendingPathComponent("Media")
+            .appendingPathComponent(sessionID.uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        return directory.appendingPathComponent("\(sourceID.uuidString).m4a")
+    }
+
+    public func deleteMedia(at url: URL) async throws {
+        if FileManager.default.fileExists(atPath: url.path) {
+            try FileManager.default.removeItem(at: url)
+        }
+    }
+
     public func reset() async throws {
         if FileManager.default.fileExists(atPath: rootDirectory.path) {
             try FileManager.default.removeItem(at: rootDirectory)
         }
+    }
+}
+
+public actor InMemoryAudioRecordingRecoveryRepository: AudioRecordingRecoveryRepository {
+    private var metadata: AudioRecordingRecoveryMetadata?
+
+    public init() {}
+
+    public func save(_ metadata: AudioRecordingRecoveryMetadata) async throws {
+        self.metadata = metadata
+    }
+
+    public func fetch() async throws -> AudioRecordingRecoveryMetadata? {
+        metadata
+    }
+
+    public func clear() async throws {
+        metadata = nil
     }
 }

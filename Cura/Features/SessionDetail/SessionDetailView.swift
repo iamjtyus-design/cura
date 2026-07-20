@@ -2,15 +2,26 @@ import SwiftUI
 
 public struct SessionDetailView: View {
     @ObservedObject public var model: PhaseOneViewModel
+    @ObservedObject public var recordingModel: AudioRecordingViewModel
     public let session: CaptureSession
+    @State private var title: String
+    @State private var mode: CaptureMode
+    @State private var folderID: UUID?
+    @State private var processingMode: ProcessingMode
 
-    public init(model: PhaseOneViewModel, session: CaptureSession) {
+    public init(model: PhaseOneViewModel, recordingModel: AudioRecordingViewModel, session: CaptureSession) {
         self.model = model
+        self.recordingModel = recordingModel
         self.session = session
+        _title = State(initialValue: session.title)
+        _mode = State(initialValue: session.mode)
+        _folderID = State(initialValue: session.folderID)
+        _processingMode = State(initialValue: session.processingMode)
     }
 
     public var note: CuratedNote? { model.note(for: session.id) }
     public var caption: GeneratedOutput? { model.instagramCaption(for: session.id) }
+    public var audioSource: CaptureSource? { model.audioSource(for: session.id) }
 
     public var body: some View {
         ScrollView {
@@ -35,6 +46,55 @@ public struct SessionDetailView: View {
                 }
 
                 ProcessingStagesView(model: model)
+
+                if let audioSource {
+                    AudioPlaybackView(recordingModel: recordingModel, source: audioSource)
+
+                    Button("Delete Recording", role: .destructive) {
+                        Task { await model.deleteRecording(audioSource) }
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityLabel("Delete Recording")
+                }
+
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Session Details")
+                        .font(.headline)
+                    TextField("Title", text: $title)
+                        .textFieldStyle(.roundedBorder)
+                        .accessibilityLabel("Session title")
+                    Picker("Mode", selection: $mode) {
+                        ForEach(CaptureMode.allCases, id: \.self) { mode in
+                            Text(mode.displayName).tag(mode)
+                        }
+                    }
+                    Picker("Folder", selection: $folderID) {
+                        Text("No Folder").tag(UUID?.none)
+                        ForEach(model.folders) { folder in
+                            Text(folder.name).tag(Optional(folder.id))
+                        }
+                    }
+                    Picker("Processing Mode", selection: $processingMode) {
+                        Text("Private").tag(ProcessingMode.private)
+                        Text("Smart").tag(ProcessingMode.smart)
+                    }
+                    Button("Save Session Details") {
+                        Task {
+                            await model.saveSessionMetadata(
+                                session,
+                                title: title,
+                                mode: mode,
+                                folderID: folderID,
+                                processingMode: processingMode
+                            )
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityLabel("Save Session Details")
+                }
+                .padding()
+                .background(PhaseOneSurface.secondary)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
 
                 if let note {
                     VStack(alignment: .leading, spacing: 8) {
@@ -87,6 +147,11 @@ public struct SessionDetailView: View {
                     model.selectedSession = nil
                 }
                 .accessibilityIdentifier("backToSessionsButton")
+
+                Button("Delete Session", role: .destructive) {
+                    Task { await model.deleteSession(session) }
+                }
+                .accessibilityLabel("Delete Session")
             }
             .padding()
         }

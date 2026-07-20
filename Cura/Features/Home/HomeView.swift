@@ -29,6 +29,16 @@ public struct HomeView: View {
                 .controlSize(.large)
                 .accessibilityLabel("Import Video")
 
+                Button {
+                    model.showingAudioRecorder = true
+                } label: {
+                    Label("Record Audio", systemImage: "mic.circle")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+                .accessibilityLabel("Record Audio")
+
                 FolderComposer(model: model)
 
                 if model.sessions.isEmpty {

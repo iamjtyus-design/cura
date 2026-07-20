@@ -29,4 +29,38 @@ final class CuraUITests: XCTestCase {
         relaunched.launch()
         XCTAssertTrue(relaunched.buttons.matching(NSPredicate(format: "label CONTAINS %@", "cura-ui-test-video")).firstMatch.waitForExistence(timeout: 5))
     }
+
+    func testPhaseTwoAMockAudioRecordingFlowPersistsAfterRelaunch() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-ui-testing", "-reset-phase1-store"]
+        app.launch()
+
+        XCTAssertTrue(app.buttons["Record Audio"].waitForExistence(timeout: 5))
+        app.buttons["Record Audio"].tap()
+        XCTAssertTrue(app.buttons["Record Audio"].waitForExistence(timeout: 5))
+        app.buttons["Record Audio"].tap()
+
+        XCTAssertTrue(app.buttons["Continue"].waitForExistence(timeout: 5))
+        app.buttons["Continue"].tap()
+        XCTAssertTrue(app.buttons["Start Recording"].waitForExistence(timeout: 5))
+        app.buttons["Start Recording"].tap()
+        XCTAssertTrue(app.buttons["Add Timestamp Marker"].waitForExistence(timeout: 5))
+        app.buttons["Add Timestamp Marker"].tap()
+        app.buttons["Pause Recording"].tap()
+        XCTAssertTrue(app.buttons["Resume Recording"].waitForExistence(timeout: 5))
+        app.buttons["Resume Recording"].tap()
+        app.buttons["Stop and Save"].tap()
+
+        XCTAssertTrue(app.staticTexts["Recording"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Play Recording"].exists)
+        app.buttons["Back to Sessions"].tap()
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Audio Recording")).firstMatch.waitForExistence(timeout: 5))
+
+        app.terminate()
+
+        let relaunched = XCUIApplication()
+        relaunched.launchArguments = ["-ui-testing"]
+        relaunched.launch()
+        XCTAssertTrue(relaunched.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Audio Recording")).firstMatch.waitForExistence(timeout: 5))
+    }
 }

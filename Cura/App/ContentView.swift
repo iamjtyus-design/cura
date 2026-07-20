@@ -4,19 +4,35 @@ import CuraCore
 struct ContentView: View {
     let container: DependencyContainer
     @StateObject private var model: PhaseOneViewModel
+    @StateObject private var audioModel: AudioRecordingViewModel
 
     init(container: DependencyContainer) {
         self.container = container
         _model = StateObject(wrappedValue: PhaseOneViewModel(container: container))
+        _audioModel = StateObject(wrappedValue: AudioRecordingViewModel(container: container))
     }
 
     var body: some View {
         NavigationStack {
             Group {
-                if let draft = model.draftSession {
+                if model.showingAudioRecorder {
+                    AudioRecordingView(
+                        model: audioModel,
+                        onSave: { session in
+                            Task {
+                                await model.refreshLibrary()
+                                model.selectedSession = session
+                                model.showingAudioRecorder = false
+                            }
+                        },
+                        onCancel: {
+                            model.showingAudioRecorder = false
+                        }
+                    )
+                } else if let draft = model.draftSession {
                     SessionSetupView(model: model, session: draft)
                 } else if let selected = model.selectedSession {
-                    SessionDetailView(model: model, session: selected)
+                    SessionDetailView(model: model, recordingModel: audioModel, session: selected)
                 } else {
                     HomeView(model: model)
                 }

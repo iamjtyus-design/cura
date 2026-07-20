@@ -228,3 +228,31 @@
 2. Mock processing timing and Creator Pack creation are owned by `ProcessingProviding`.
 3. Clipboard and Instagram fallback behavior are owned by `QuickSendProviding`.
 4. Live AI, Supabase, RevenueCat, authentication, paid services, audio recording, video editing, and automatic publishing remain unstarted.
+
+## D-022: Phase 2A audio is local-only
+
+**Date:** 2026-07-20
+
+**Decision:** Implement reliable audio capture as a local-only feature using AVFoundation and local persistence.
+
+**Reason:** Phase 2A explicitly excludes cloud upload, transcription, AI generation, Supabase, RevenueCat, authentication, and Phase 2B work.
+
+**Consequences:**
+
+1. Audio recordings are stored locally as M4A/AAC files through the media-storage abstraction.
+2. Completed recordings create local Capture Sessions and live-audio Capture Sources.
+3. No remote service, transcript, or generated output is created by the audio flow.
+
+## D-023: Audio recovery metadata
+
+**Date:** 2026-07-20
+
+**Decision:** Persist active recording recovery metadata in the local JSON library snapshot.
+
+**Reason:** Interrupted or incomplete recordings need recoverable context without introducing production persistence or sync.
+
+**Consequences:**
+
+1. Recovery metadata includes session ID, source ID, file URL, start date, accumulated duration, pause state, markers, last update, and interruption reason.
+2. Relaunch can surface an interrupted recording when metadata exists.
+3. Production persistence can later migrate this metadata behind the same repository contract.

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 1 first local, mock-driven vertical slice is implemented and verified locally. Phase 1.1 architecture cleanup is in progress. Phase 2 has not started.
+Phase 2A reliable local audio capture is implemented and verified locally. Phase 2B has not started.
 
 ## Completed
 
@@ -56,6 +56,14 @@ Phase 1 first local, mock-driven vertical slice is implemented and verified loca
 48. Quick Send behavior moved behind `QuickSendProviding`.
 49. Phase 1 mock processing output creation moved behind `ProcessingProviding`.
 50. Focused Phase 1.1 view-model unit tests.
+51. Local audio-recording flow with consent, permission handling, visible recording controls, pause/resume, markers, stop/save, playback, metadata editing, deletion, and relaunch persistence.
+52. `AudioRecordingProviding` and `AudioPlaybackProviding` protocols.
+53. AVFoundation production recording and playback providers.
+54. Preview/test/mock audio providers.
+55. Audio recording state machine.
+56. Audio recovery metadata persistence.
+57. Microphone usage description in app build settings.
+58. Audio unit tests and mock audio UI test.
 
 ## Verification
 
@@ -63,11 +71,11 @@ Phase 1 first local, mock-driven vertical slice is implemented and verified loca
 2. `xcodebuild -project Cura.xcodeproj -target CuraApp -sdk iphonesimulator build` passes.
 3. `xcodebuild -project Cura.xcodeproj -target CuraTests -sdk iphonesimulator build` passes.
 4. `xcodebuild -project Cura.xcodeproj -target CuraUITests -sdk iphonesimulator build` passes.
-5. `swift test` passes 11 tests.
+5. `swift test` passes 19 tests.
 6. `swift run CuraSmokeTests` passes.
 7. `sh scripts/secret_scan.sh` passes.
 8. `xcodebuild -project Cura.xcodeproj -scheme CuraApp -destination 'id=0001DB82-B759-4301-AB9C-F79DC34B9867' test` passes.
-9. Native scheme-level verification executed 11 unit tests and 1 UI test with 0 failures.
+9. Native scheme-level verification executed 19 unit tests and 2 UI tests with 0 failures.
 
 ## Blocked
 
@@ -94,10 +102,13 @@ Phase 1 first local, mock-driven vertical slice is implemented and verified loca
 10. Supabase integration.
 11. RevenueCat integration.
 12. Production persistence.
-13. Audio recording.
+13. Live transcription.
+14. Cloud upload.
+15. AI generation.
+16. Phase 2B.
 14. Video editing.
 15. Automatic publishing.
 
 ## Next Milestone
 
-Phase 1.1 satisfies its architecture-cleanup exit criteria after commit and push. Next milestone requires explicit Phase 2 approval.
+Phase 2A satisfies its local audio capture exit criteria after commit and push. Next milestone requires explicit Phase 2B approval.
