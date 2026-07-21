@@ -377,3 +377,19 @@
 2. The provider emits predictable transcript segments, summary, key points, and action items for reliable unit and UI testing.
 3. CURA does not claim production-grade, on-device, private, or cloud transcription behavior in this build.
 4. Phase 2B.2 should decide and validate the production transcription architecture before any live provider is connected.
+
+## D-032: Phase 2B.1.1 QA remediation remains local and demo-labeled
+
+**Date:** 2026-07-21
+
+**Decision:** Fix Phase 2B.1 physical-device QA issues without changing providers, adding cloud behavior, or beginning Phase 2B.2.
+
+**Reason:** The approved Phase 2B.1 flow worked but needed device-polish fixes for playback, consent presentation, truthful mock labeling, processing cleanup, title/save feedback, note readability, folder disclosure, and recording metadata.
+
+**Consequences:**
+
+1. Recording-tab playback loads from the selected source URL before play and only pauses for relevant device route-loss/background events.
+2. Consent education remains versioned and one-time per install/text version, while acknowledged users go straight to the ready recording controls.
+3. Mock transcript and Curated Note content is labeled as demo sample content not generated from the user's recording.
+4. Completed audio notes hide stale processing panels and never imply Creator Pack generation.
+5. Phase 2B.2 provider selection, production transcription, cloud upload, live AI, Supabase, RevenueCat, authentication, and publishing remain deferred.

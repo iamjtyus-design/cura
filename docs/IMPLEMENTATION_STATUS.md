@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 2B.1 audio transcription and the first editable Curated Note are implemented with a deterministic local demo/mock provider. Production transcription, cloud upload, live AI generation, Supabase, RevenueCat, authentication, and Phase 2B.2 work have not started.
+Phase 2B.1.1 physical-device QA remediation is implemented for the local/demo audio transcription and editable Curated Note slice. Production transcription, cloud upload, live AI generation, Supabase, RevenueCat, authentication, and Phase 2B.2 work have not started.
 
 ## Completed
 
@@ -82,6 +82,11 @@ Phase 2B.1 audio transcription and the first editable Curated Note are implement
 74. Suggested-title flow that keeps manual session titles intact unless the user accepts or edits the suggestion.
 75. Session Detail audio tabs for Curated Note, Transcript, and Recording.
 76. Retry, cancellation, failure preservation, empty-transcript handling, and legacy Curated Note migration coverage.
+77. Phase 2B.1.1 playback restores source-URL-backed play behavior and avoids pausing on unrelated audio route changes.
+78. Phase 2B.1.1 consent entry respects persisted one-time acknowledgement and opens acknowledged users directly to Start Recording.
+79. Phase 2B.1.1 UI labels deterministic mock transcripts and Curated Notes as demo sample content not generated from the user's recording.
+80. Phase 2B.1.1 hides completed audio processing panels, removes Creator Pack implication from audio note creation, and keeps audio stages to Preparing Audio, Transcribing, Building Curated Note, and Ready.
+81. Phase 2B.1.1 improves title acceptance, inline save feedback, action completion controls, multiline note editing, folder disclosure, and friendly recording metadata.
 
 ## Verification
 
@@ -89,11 +94,11 @@ Phase 2B.1 audio transcription and the first editable Curated Note are implement
 2. `xcodebuild -project Cura.xcodeproj -target CuraApp -sdk iphonesimulator build` passes.
 3. `xcodebuild -project Cura.xcodeproj -target CuraTests -sdk iphonesimulator build` passes.
 4. `xcodebuild -project Cura.xcodeproj -target CuraUITests -sdk iphonesimulator build` passes.
-5. `swift test` passes 39 tests.
+5. `swift test` passes 42 tests.
 6. `swift run CuraSmokeTests` passes.
 7. `sh scripts/secret_scan.sh` passes.
 8. `xcodebuild -project Cura.xcodeproj -scheme CuraApp -destination 'id=0001DB82-B759-4301-AB9C-F79DC34B9867' test` passes.
-9. Native scheme-level verification executed 39 unit tests and 3 UI tests with 0 failures in the latest full run.
+9. Native scheme-level verification executed 42 unit tests and 3 UI tests with 0 failures in the latest full run.
 10. Device Debug build for connected iPhone `00008150-001643EA0C3A401C` passes when the local development team is supplied outside committed source.
 11. `Cura.app` and embedded `CuraCore.framework` pass `codesign` verification.
 12. `otool -D` verifies embedded `CuraCore.framework` uses `@rpath/CuraCore.framework/CuraCore`.
@@ -120,6 +125,13 @@ Phase 2B.1 audio transcription and the first editable Curated Note are implement
 33. `Cura.app` and embedded `CuraCore.framework` passed code-signature verification for the Phase 2B.1 device build.
 34. `xcrun devicectl device install app` installed the Phase 2B.1 build successfully.
 35. `xcrun devicectl device process launch --terminate-existing com.visionbuilt.cura` launched the Phase 2B.1 build successfully.
+36. Phase 2B.1.1 targeted audio UI rerun passed on iPhone 17 Pro simulator, iOS 26.5.
+37. Phase 2B.1.1 full native scheme-level tests passed on iPhone 17 Pro simulator, iOS 26.5, with 42 unit tests and 3 UI tests.
+38. Phase 2B.1.1 explicit simulator build passed.
+39. Phase 2B.1.1 smoke test passed.
+40. Phase 2B.1.1 device Debug build passed for connected iPhone `6A67316D-CE7A-5520-B8B7-BCAEBE23E5F3`.
+41. Phase 2B.1.1 `Cura.app` and embedded `CuraCore.framework` passed code-signature verification.
+42. Phase 2B.1.1 device install and launch passed for `com.visionbuilt.cura`.
 
 ## Blocked
 
@@ -155,4 +167,4 @@ Phase 2B.1 audio transcription and the first editable Curated Note are implement
 
 ## Next Milestone
 
-Phase 2B.1 satisfies the first local/demo transcription and editable Curated Note slice once final reruns, device launch, commit, and push are complete. The exact next recommended action after approval is Phase 2B.2 provider selection and production-transcription architecture, without starting cloud upload, Supabase, RevenueCat, authentication, or publishing until explicitly approved.
+Phase 2B.1.1 satisfies the requested physical-device QA remediation once commit and push are complete. The exact next recommended action after approval is Phase 2B.2 provider selection and production-transcription architecture, without starting cloud upload, Supabase, RevenueCat, authentication, or publishing until explicitly approved.

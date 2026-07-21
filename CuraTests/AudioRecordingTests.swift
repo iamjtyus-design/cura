@@ -117,6 +117,20 @@ final class AudioRecordingTests: XCTestCase {
         XCTAssertEqual(model.state, .ready)
     }
 
+    func testConsentAcknowledgementSurvivesRelaunchStyleModelRecreation() async {
+        let container = DependencyContainer.test
+        let model = AudioRecordingViewModel(container: container)
+
+        await model.recordTapped()
+        await model.acceptConsentAndPrepare()
+
+        let relaunched = AudioRecordingViewModel(container: container)
+        await relaunched.prepareForNewCapturePresentation()
+
+        XCTAssertFalse(relaunched.showConsentNotice)
+        XCTAssertEqual(relaunched.state, .ready)
+    }
+
     func testConsentResetPathShowsNoticeAgain() async {
         let model = AudioRecordingViewModel(container: .test)
 
@@ -237,6 +251,21 @@ final class AudioRecordingTests: XCTestCase {
 
         XCTAssertTrue(model.isPlaybackPlaying)
         XCTAssertGreaterThan(model.playbackPosition, 0)
+    }
+
+    func testPlaybackCanStartFromSourceURLAfterSeek() async throws {
+        let container = DependencyContainer.test
+        let model = AudioRecordingViewModel(container: container)
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("m4a")
+        try Data("mock audio".utf8).write(to: url)
+
+        await model.loadPlayback(url: url)
+        await model.seek(to: 1)
+        await model.play(url: url)
+        try await Task.sleep(nanoseconds: 250_000_000)
+
+        XCTAssertTrue(model.isPlaybackPlaying)
+        XCTAssertGreaterThan(model.playbackPosition, 1)
     }
 
     func testSeekUpdatesPlaybackPosition() async throws {

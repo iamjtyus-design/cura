@@ -135,9 +135,17 @@ public actor AVFoundationAudioPlaybackProvider: AudioPlaybackProviding {
     }
 
     public func play() async throws {
-        try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+        guard let player else {
+            throw CocoaError(.fileReadNoSuchFile)
+        }
+        if player.currentTime >= player.duration {
+            player.currentTime = 0
+        }
+        try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.defaultToSpeaker])
         try AVAudioSession.sharedInstance().setActive(true)
-        player?.play()
+        guard player.play() else {
+            throw CocoaError(.fileReadUnknown)
+        }
     }
 
     public func pause() async {

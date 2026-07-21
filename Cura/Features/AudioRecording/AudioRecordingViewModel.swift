@@ -26,6 +26,7 @@ public final class AudioRecordingViewModel: ObservableObject {
     private var recordingStartDate: Date?
     private var recordingTimerTask: Task<Void, Never>?
     private var playbackTimerTask: Task<Void, Never>?
+    private var loadedPlaybackURL: URL?
 
     public var showingError: Binding<Bool> {
         Binding(
@@ -90,6 +91,11 @@ public final class AudioRecordingViewModel: ObservableObject {
         showConsentNotice = false
         resetCaptureState()
         clearPlaybackState()
+    }
+
+    public func prepareForNewCapturePresentation() async {
+        prepareForNewCapture()
+        await recordTapped()
     }
 
     private func prepareForRecordingPermission() async {
@@ -241,21 +247,35 @@ public final class AudioRecordingViewModel: ObservableObject {
         }
 
         do {
+            stopPlaybackTimer()
             playbackUnavailableMessage = ""
             playbackDuration = try await container.audioPlayback.load(url: url)
             playbackPosition = await container.audioPlayback.currentTime()
             isPlaybackPlaying = false
+            loadedPlaybackURL = url
         } catch {
             clearPlaybackState()
             playbackUnavailableMessage = "Recording playback is unavailable for this file."
         }
     }
 
-    public func play() async {
+    public func play(url: URL? = nil) async {
         do {
+            if let url, loadedPlaybackURL != url {
+                await loadPlayback(url: url)
+            }
+            if let url, loadedPlaybackURL == nil {
+                await loadPlayback(url: url)
+            }
+            guard playbackUnavailableMessage.isEmpty else { return }
             try await container.audioPlayback.play()
             isPlaybackPlaying = await container.audioPlayback.isPlaying()
-            startPlaybackTimer()
+            if isPlaybackPlaying {
+                startPlaybackTimer()
+            } else {
+                playbackPosition = await container.audioPlayback.currentTime()
+                errorMessage = "Recording playback could not start."
+            }
         } catch {
             isPlaybackPlaying = false
             errorMessage = "Recording playback could not start."
@@ -334,6 +354,7 @@ public final class AudioRecordingViewModel: ObservableObject {
         playbackPosition = 0
         isPlaybackPlaying = false
         playbackUnavailableMessage = ""
+        loadedPlaybackURL = nil
     }
 
     private func startRecordingTimer() {

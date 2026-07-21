@@ -1,6 +1,6 @@
 # Current State
 
-Phase 2B.1 audio transcription and the first editable Curated Note are implemented on top of the approved Phase 2A.2 local audio capture flow.
+Phase 2B.1.1 physical-device QA remediation is implemented on top of the approved Phase 2B.1 audio transcription and first editable Curated Note flow.
 
 Current foundation and Phase 1 slice:
 
@@ -70,6 +70,15 @@ Current foundation and Phase 1 slice:
 64. Transcript and generated Curated Note text can be copied only through explicit user taps.
 65. Failed processing preserves the original audio and Capture Session, stores the failure state, and exposes Retry.
 66. Legacy Curated Note JSON remains decodable through an in-model migration path without silent destructive migration.
+67. Phase 2B.1.1 restores reliable recording-tab playback after tab changes and source URL loading.
+68. Recording consent education opens directly to the normal ready screen after the persisted one-time acknowledgement is present.
+69. Demo/mock transcript and Curated Note content is explicitly labeled as sample content not generated from the user's recording.
+70. Completed audio Curated Notes hide stale processing panels, use only audio-appropriate stages, and do not mention Creator Pack generation.
+71. Suggested-title acceptance immediately updates the top editable session title while preserving manual user title edits unless explicitly accepted.
+72. Curated Note saves show a restrained inline confirmation, prevent duplicate in-flight saves, and persist summary, key points, action completion, and user notes.
+73. Suggested action completion now uses checkbox-style controls instead of settings-style switches.
+74. Curated Note summary, key points, and user notes use more readable multiline editing surfaces.
+75. Folder creation is disclosed behind Add Folder, prevents blank saves, and preserves folder assignment/persistence.
 
 Verification on 2026-07-20:
 
@@ -180,3 +189,20 @@ Phase 2B.1 verification on 2026-07-21:
 8. `codesign --verify --strict --verbose=2` passed for the embedded `CuraCore.framework`.
 9. `xcrun devicectl device install app` installed `com.visionbuilt.cura` successfully on the connected iPhone.
 10. `xcrun devicectl device process launch --terminate-existing com.visionbuilt.cura` launched successfully.
+
+Phase 2B.1.1 verification on 2026-07-21:
+
+1. Xcode version: Xcode 26.6, build 17F113.
+2. Simulator used: iPhone 17 Pro, iOS 26.5, UDID `0001DB82-B759-4301-AB9C-F79DC34B9867`.
+3. Physical device used: iPhone 17 Pro Max, UDID `6A67316D-CE7A-5520-B8B7-BCAEBE23E5F3`.
+4. `swift test` passed with 42 tests.
+5. Targeted audio UI flow rerun passed.
+6. `xcodebuild -project Cura.xcodeproj -scheme CuraApp -destination 'id=0001DB82-B759-4301-AB9C-F79DC34B9867' test` passed with 42 unit tests and 3 UI tests.
+7. `swift run CuraSmokeTests` passed.
+8. Explicit simulator build passed.
+9. Device Debug build passed with the local development team supplied outside committed source.
+10. `codesign --verify --deep --strict --verbose=2` passed for the device `Cura.app`.
+11. `codesign --verify --strict --verbose=2` passed for embedded `CuraCore.framework`.
+12. `xcrun devicectl device install app` installed `com.visionbuilt.cura` successfully on the connected iPhone.
+13. `xcrun devicectl device process launch --terminate-existing com.visionbuilt.cura` launched successfully.
+14. Automated verification confirms playback state/progress behavior in simulator; audible physical-device output still requires manual listening.

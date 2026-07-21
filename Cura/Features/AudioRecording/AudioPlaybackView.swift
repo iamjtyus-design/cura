@@ -13,13 +13,11 @@ public struct AudioPlaybackView: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Audio Recording")
+            Text("Original Audio")
                 .font(.headline)
-            if let originalFilename = source.originalFilename {
-                Text("File \(originalFilename)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            Text("\(source.createdAt.formatted(date: .abbreviated, time: .shortened)) • \(formatDuration(totalDuration))")
+                .font(.caption)
+                .foregroundStyle(.secondary)
             Text("\(formatDuration(displayedPlaybackPosition)) / \(formatDuration(totalDuration))")
                 .font(.system(.body, design: .monospaced))
                 .foregroundStyle(.secondary)
@@ -52,7 +50,7 @@ public struct AudioPlaybackView: View {
                         if recordingModel.isPlaybackPlaying {
                             await recordingModel.pausePlayback()
                         } else {
-                            await recordingModel.play()
+                            await recordingModel.play(url: source.sourceURL)
                         }
                     }
                 } label: {

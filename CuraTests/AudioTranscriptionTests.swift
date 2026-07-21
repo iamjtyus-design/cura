@@ -19,6 +19,7 @@ final class AudioTranscriptionTests: XCTestCase {
         XCTAssertEqual(note.summary, note.smartSummary)
         XCTAssertEqual(note.keyPoints.count, 3)
         XCTAssertEqual(note.structuredActionItems.count, 3)
+        XCTAssertFalse(model.shouldShowProcessing(for: try XCTUnwrap(model.selectedSession)))
     }
 
     func testTranscriptionFailurePreservesSessionAndCanRetry() async throws {
@@ -98,7 +99,37 @@ final class AudioTranscriptionTests: XCTestCase {
         await model.acceptSuggestedTitle(for: session, note: note, editedTitle: "Edited Launch Memo")
         let sessionAfterAccept = try await container.sessions.fetch(id: session.id)
         XCTAssertEqual(sessionAfterAccept?.title, "Edited Launch Memo")
+        XCTAssertEqual(model.selectedSession?.title, "Edited Launch Memo")
         XCTAssertEqual(model.note(for: session.id)?.confirmedTitle, "Edited Launch Memo")
+    }
+
+    func testCuratedNoteEditsPersistActionCompletionAndMultilineKeyPoints() async throws {
+        let container = DependencyContainer.make(configuration: .development, processingStageDelayNanoseconds: 1)
+        let model = PhaseOneViewModel(container: container)
+        let session = try await saveAudioSession(in: container)
+
+        await model.reloadForTesting()
+        model.startCuratedNoteProcessing(for: session)
+        try await waitForNote(sessionID: session.id, in: model)
+
+        let note = try XCTUnwrap(model.note(for: session.id))
+        var actions = note.structuredActionItems
+        actions[0].isCompleted = true
+
+        await model.saveCuratedNoteEdits(
+            note,
+            summary: "Updated summary",
+            keyPoints: ["First line\nsecond line", "Another point"],
+            actionItems: actions,
+            userNotes: "Reviewer note"
+        )
+
+        let fetched = try await container.curatedNotes.fetchNote(for: session.id)
+        let persisted = try XCTUnwrap(fetched)
+        XCTAssertEqual(persisted.summary, "Updated summary")
+        XCTAssertEqual(persisted.keyPoints.first, "First line\nsecond line")
+        XCTAssertTrue(persisted.structuredActionItems[0].isCompleted)
+        XCTAssertEqual(persisted.userNotes, "Reviewer note")
     }
 
     func testCuratedNotePersistenceAndMigrationCompatibility() async throws {

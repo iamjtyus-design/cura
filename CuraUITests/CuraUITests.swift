@@ -8,9 +8,12 @@ final class CuraUITests: XCTestCase {
         app.launch()
 
         XCTAssertTrue(app.buttons["Import Video"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.textFields["New folder name"].exists)
+        app.buttons["Add Folder"].tap()
         app.textFields["New folder name"].tap()
         app.textFields["New folder name"].typeText("Creator Clips")
-        app.buttons["Add Folder"].tap()
+        XCTAssertTrue(app.buttons["Save Folder"].isEnabled)
+        app.buttons["Save Folder"].tap()
 
         app.buttons["Import Video"].tap()
         XCTAssertTrue(app.textFields["Session title"].waitForExistence(timeout: 5))
@@ -48,10 +51,18 @@ final class CuraUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Create Curated Note"].waitForExistence(timeout: 5))
         app.buttons["Create Curated Note"].tap()
         XCTAssertTrue(app.textFields["suggestedTitleField"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.staticTexts["curatedNoteProviderDisclosure"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["curatedNoteProviderDisclosure"].label.contains("Demo Curated Note"))
+        XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "Creating Creator Pack")).firstMatch.exists)
         app.textFields["suggestedTitleField"].replaceText(with: "Edited Launch Memo")
         app.buttons["Accept Title"].tap()
+        XCTAssertTrue(app.textFields["topSessionTitleField"].waitForValueContaining("Edited Launch Memo", timeout: 5))
+        app.buttons["saveCuratedNoteButton"].tap()
+        XCTAssertTrue(app.staticTexts["curatedNoteSaveConfirmation"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.buttons["Transcript"].waitForExistence(timeout: 5))
         app.buttons["Transcript"].tap()
+        XCTAssertTrue(app.staticTexts["transcriptProviderDisclosure"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["transcriptProviderDisclosure"].label.contains("Demo transcript"))
         XCTAssertTrue(app.staticTexts["transcriptText"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "launch checklist")).firstMatch.exists)
         app.buttons["Recording"].tap()
@@ -107,11 +118,10 @@ final class CuraUITests: XCTestCase {
 private func recordAndSaveAudio(in app: XCUIApplication) {
     XCTAssertTrue(app.buttons["Record Audio"].waitForExistence(timeout: 5))
     app.buttons["Record Audio"].tap()
-    XCTAssertTrue(app.buttons["Record Audio"].waitForExistence(timeout: 5))
-    app.buttons["Record Audio"].tap()
 
-    XCTAssertTrue(app.buttons["Continue"].waitForExistence(timeout: 5))
-    app.buttons["Continue"].tap()
+    if app.buttons["Continue"].waitForExistence(timeout: 3) {
+        app.buttons["Continue"].tap()
+    }
     XCTAssertTrue(app.buttons["Start Recording"].waitForExistence(timeout: 5))
     app.buttons["Start Recording"].tap()
     XCTAssertTrue(app.buttons["Add Timestamp Marker"].waitForExistence(timeout: 5))
@@ -143,6 +153,14 @@ private extension XCUIElement {
 
     func waitForValueNotBeginning(with prefix: String, timeout: TimeInterval) -> Bool {
         waitForPredicate(NSPredicate(format: "NOT value BEGINSWITH %@", prefix), timeout: timeout)
+    }
+
+    func waitForValueContaining(_ text: String, timeout: TimeInterval) -> Bool {
+        waitForPredicate(NSPredicate(format: "value CONTAINS %@", text), timeout: timeout)
+    }
+
+    func waitForLabel(_ text: String, timeout: TimeInterval) -> Bool {
+        waitForPredicate(NSPredicate(format: "label == %@", text), timeout: timeout)
     }
 
     func waitForPredicate(_ predicate: NSPredicate, timeout: TimeInterval) -> Bool {

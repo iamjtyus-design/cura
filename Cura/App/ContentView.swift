@@ -43,7 +43,7 @@ struct ContentView: View {
             }
             .onChange(of: model.showingAudioRecorder) { _, isShowing in
                 if isShowing {
-                    audioModel.prepareForNewCapture()
+                    Task { await audioModel.prepareForNewCapturePresentation() }
                 }
             }
             .alert("CURA needs attention", isPresented: model.showingError) {

@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 #if os(iOS) && canImport(AVFoundation)
 import AVFoundation
 #endif
@@ -12,6 +15,7 @@ private enum SessionDetailContentTab: String, CaseIterable, Identifiable {
 }
 
 public struct SessionDetailView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @ObservedObject public var model: PhaseOneViewModel
     @ObservedObject public var recordingModel: AudioRecordingViewModel
     public let session: CaptureSession
@@ -21,6 +25,8 @@ public struct SessionDetailView: View {
     @State private var processingMode: ProcessingMode
     @State private var selectedContentTab: SessionDetailContentTab = .curatedNote
     @State private var showingDeleteRecordingConfirmation = false
+    @State private var isAddingFolder = false
+    @State private var detailFolderName = ""
 
     public init(model: PhaseOneViewModel, recordingModel: AudioRecordingViewModel, session: CaptureSession) {
         self.model = model
@@ -65,7 +71,7 @@ public struct SessionDetailView: View {
                     ProcessingStagesView(model: model, sourceType: model.primarySourceType(for: session.id))
                 }
 
-                if audioSource != nil {
+                if shouldShowAudioProcessingControls {
                     audioProcessingControls
                 }
 
@@ -87,16 +93,36 @@ public struct SessionDetailView: View {
                             Text(folder.name).tag(Optional(folder.id))
                         }
                     }
-                    HStack {
-                        TextField("New folder name", text: $model.newFolderName)
-                            .textFieldStyle(.roundedBorder)
-                            .accessibilityLabel("New folder name")
-                        Button("Add Folder") {
-                            Task {
-                                if let folder = await model.addFolder() {
-                                    folderID = folder.id
+                    if isAddingFolder {
+                        VStack(alignment: .leading, spacing: 8) {
+                            TextField("New folder name", text: $detailFolderName)
+                                .textFieldStyle(.roundedBorder)
+                                .accessibilityLabel("New folder name")
+                            HStack {
+                                Button("Save Folder") {
+                                    model.newFolderName = detailFolderName
+                                    Task {
+                                        if let folder = await model.addFolder() {
+                                            folderID = folder.id
+                                            detailFolderName = ""
+                                            isAddingFolder = false
+                                        }
+                                    }
                                 }
+                                .buttonStyle(.borderedProminent)
+                                .disabled(detailFolderName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                                .accessibilityIdentifier("saveFolderButton")
+
+                                Button("Cancel") {
+                                    detailFolderName = ""
+                                    isAddingFolder = false
+                                }
+                                .buttonStyle(.bordered)
                             }
+                        }
+                    } else {
+                        Button("Add Folder") {
+                            isAddingFolder = true
                         }
                         .buttonStyle(.bordered)
                         .accessibilityLabel("Add Folder")
@@ -211,15 +237,40 @@ public struct SessionDetailView: View {
         .onReceive(NotificationCenter.default.publisher(for: AVAudioSession.interruptionNotification)) { _ in
             Task { await recordingModel.handlePlaybackInterruption() }
         }
-        .onReceive(NotificationCenter.default.publisher(for: AVAudioSession.routeChangeNotification)) { _ in
-            Task { await recordingModel.handlePlaybackInterruption() }
+        .onReceive(NotificationCenter.default.publisher(for: AVAudioSession.routeChangeNotification)) { notification in
+            let reasonValue = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt
+            let reason = AVAudioSession.RouteChangeReason(rawValue: reasonValue ?? 0)
+            if reason == .oldDeviceUnavailable {
+                Task { await recordingModel.handlePlaybackInterruption() }
+            }
         }
 #endif
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .background {
+                Task { await recordingModel.handlePlaybackInterruption() }
+            }
+        }
+        .onChange(of: session.title) { _, newTitle in
+            title = newTitle
+        }
+        .onChange(of: session.mode) { _, newMode in
+            mode = newMode
+        }
+        .onChange(of: session.folderID) { _, newFolderID in
+            folderID = newFolderID
+        }
     }
 
     private var durationText: String {
         guard let duration = audioSource?.duration else { return "" }
         return " • \(Self.formatTime(duration))"
+    }
+
+    private var shouldShowAudioProcessingControls: Bool {
+        guard audioSource != nil else { return false }
+        if model.isCreatingCuratedNote(for: session.id) { return true }
+        if note?.generationStatus == .failed { return true }
+        return note == nil
     }
 
     @ViewBuilder
@@ -230,6 +281,11 @@ public struct SessionDetailView: View {
                 Text(progress?.status.displayName ?? "Preparing Audio")
                     .font(.headline)
                     .accessibilityIdentifier("curatedNoteProcessingStage")
+                if let status = progress?.status, status != .completed {
+                    Text("Demo processing uses sample transcript content in this build.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
                 if let fraction = progress?.fractionCompleted {
                     ProgressView(value: fraction)
                         .accessibilityLabel("Curated Note progress")
@@ -269,7 +325,6 @@ public struct SessionDetailView: View {
     private var curatedNoteContent: some View {
         if let note {
             CuratedNoteEditorView(model: model, session: session, note: note)
-                .id(note.updatedAt)
         } else {
             Text("Create a Curated Note to see generated summary, key points, and suggested actions.")
                 .foregroundStyle(.secondary)
@@ -284,11 +339,12 @@ public struct SessionDetailView: View {
     private var transcriptContent: some View {
         if let note {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Generated transcript")
+            Text("Generated transcript")
                     .font(.headline)
-                Text("Generated from the saved audio by the active transcription provider. Review and edit derived notes before relying on them.")
+                Text(providerDisclosure(for: note))
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .accessibilityIdentifier("transcriptProviderDisclosure")
                 if note.generationStatus == .failed {
                     Text(note.generationError ?? "Transcript unavailable.")
                         .foregroundStyle(.secondary)
@@ -365,6 +421,13 @@ public struct SessionDetailView: View {
         let totalSeconds = max(0, Int(interval.rounded()))
         return String(format: "%02d:%02d", totalSeconds / 60, totalSeconds % 60)
     }
+
+    private func providerDisclosure(for note: CuratedNote) -> String {
+        if note.promptVersion == "local-demo-mock" {
+            return "Demo transcript - this sample content was not generated from your recording."
+        }
+        return "Transcript generated by the active transcription provider. Review and edit derived notes before relying on them."
+    }
 }
 
 private struct CuratedNoteEditorView: View {
@@ -376,6 +439,14 @@ private struct CuratedNoteEditorView: View {
     @State private var keyPoints: [String]
     @State private var actionItems: [CuratedActionItem]
     @State private var userNotes: String
+    @State private var saveState: SaveState = .idle
+    @State private var isSaving = false
+
+    private enum SaveState {
+        case idle
+        case saving
+        case saved
+    }
 
     init(model: PhaseOneViewModel, session: CaptureSession, note: CuratedNote) {
         self.model = model
@@ -392,9 +463,10 @@ private struct CuratedNoteEditorView: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Curated Note")
                 .font(.headline)
-            Text("Generated from the transcript. Edit before using.")
+            Text(providerDisclosure)
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .accessibilityIdentifier("curatedNoteProviderDisclosure")
 
             if note.generationStatus == .failed {
                 Text(note.generationError ?? "Curated Note generation failed.")
@@ -409,7 +481,9 @@ private struct CuratedNoteEditorView: View {
                             .accessibilityIdentifier("suggestedTitleField")
                         HStack {
                             Button("Accept Title") {
-                                Task { await model.acceptSuggestedTitle(for: session, note: note, editedTitle: suggestedTitle) }
+                                Task {
+                                    await model.acceptSuggestedTitle(for: session, note: note, editedTitle: suggestedTitle)
+                                }
                             }
                             .buttonStyle(.borderedProminent)
                             .accessibilityIdentifier("acceptSuggestedTitleButton")
@@ -426,6 +500,12 @@ private struct CuratedNoteEditorView: View {
                         .font(.subheadline.weight(.semibold))
                     TextEditor(text: $summary)
                         .frame(minHeight: 96)
+                        .padding(6)
+                        .background(Color.clear)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(.secondary.opacity(0.25))
+                        )
                         .accessibilityIdentifier("summaryEditor")
                 }
 
@@ -433,11 +513,17 @@ private struct CuratedNoteEditorView: View {
                     Text("Key Points")
                         .font(.subheadline.weight(.semibold))
                     ForEach(keyPoints.indices, id: \.self) { index in
-                        TextField("Key point", text: Binding(
+                        TextEditor(text: Binding(
                             get: { keyPoints[index] },
                             set: { keyPoints[index] = $0 }
                         ))
-                        .textFieldStyle(.roundedBorder)
+                        .frame(minHeight: 54)
+                        .padding(6)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(.secondary.opacity(0.25))
+                        )
+                        .accessibilityIdentifier("keyPointEditor-\(index)")
                     }
                 }
 
@@ -450,15 +536,24 @@ private struct CuratedNoteEditorView: View {
                     }
                     ForEach(actionItems.indices, id: \.self) { index in
                         VStack(alignment: .leading, spacing: 4) {
-                            Toggle(isOn: Binding(
-                                get: { actionItems[index].isCompleted },
-                                set: { actionItems[index].isCompleted = $0 }
-                            )) {
+                            HStack(alignment: .top, spacing: 10) {
+                                Button {
+                                    actionItems[index].isCompleted.toggle()
+                                } label: {
+                                    Image(systemName: actionItems[index].isCompleted ? "checkmark.circle.fill" : "circle")
+                                        .imageScale(.large)
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel(actionItems[index].isCompleted ? "Mark action incomplete" : "Mark action complete")
+                                .accessibilityValue(actionItems[index].isCompleted ? "Complete" : "Incomplete")
                                 TextField("Action item", text: Binding(
                                     get: { actionItems[index].title },
                                     set: { actionItems[index].title = $0 }
                                 ))
+                                .textFieldStyle(.plain)
                             }
+                            Text(actionItems[index].isCompleted ? "Complete" : "Incomplete")
+                                .font(.caption.weight(.semibold))
                             if let excerpt = actionItems[index].supportingExcerpt {
                                 Text("\(actionItems[index].evidenceState.displayName): \(excerpt)")
                                     .font(.caption)
@@ -476,24 +571,69 @@ private struct CuratedNoteEditorView: View {
                         .accessibilityIdentifier("userNotesEditor")
                 }
 
-                Button("Save Curated Note") {
-                    Task {
-                        await model.saveCuratedNoteEdits(
-                            note,
-                            summary: summary,
-                            keyPoints: keyPoints.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
-                            actionItems: actionItems.filter { !$0.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
-                            userNotes: userNotes
-                        )
+                HStack(spacing: 10) {
+                    Button(saveButtonTitle) {
+                        guard !isSaving else { return }
+                        Task { @MainActor in
+                            isSaving = true
+                            saveState = .saving
+                            await model.saveCuratedNoteEdits(
+                                note,
+                                summary: summary,
+                                keyPoints: keyPoints.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
+                                actionItems: actionItems.filter { !$0.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
+                                userNotes: userNotes
+                            )
+                            saveState = .saved
+                            isSaving = false
+#if canImport(UIKit)
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+#endif
+                            try? await Task.sleep(nanoseconds: 3_000_000_000)
+                            if saveState == .saved {
+                                saveState = .idle
+                            }
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(isSaving)
+                    .accessibilityLabel(saveButtonTitle)
+                    .accessibilityIdentifier("saveCuratedNoteButton")
+
+                    if didRecentlySave {
+                        Text("Saved")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                            .accessibilityIdentifier("curatedNoteSaveConfirmation")
                     }
                 }
-                .buttonStyle(.bordered)
-                .accessibilityIdentifier("saveCuratedNoteButton")
             }
         }
         .padding()
         .background(PhaseOneSurface.secondary)
         .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+
+    private var providerDisclosure: String {
+        if note.promptVersion == "local-demo-mock" {
+            return "Demo Curated Note - this sample content was not generated from your recording."
+        }
+        return "Generated from the transcript. Edit before using."
+    }
+
+    private var didRecentlySave: Bool {
+        saveState == .saved || model.recentlySavedCuratedNoteID == note.id
+    }
+
+    private var saveButtonTitle: String {
+        switch saveState {
+        case .idle:
+            "Save Curated Note"
+        case .saving:
+            "Saving"
+        case .saved:
+            "Saved"
+        }
     }
 }
 

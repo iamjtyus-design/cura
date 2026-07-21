@@ -19,6 +19,7 @@ public final class PhaseOneViewModel: ObservableObject {
     @Published public var shareItem: ShareItem?
     @Published public var showingAudioRecorder = false
     @Published public var curatedNoteProgressBySessionID: [UUID: TranscriptionProgress] = [:]
+    @Published public var recentlySavedCuratedNoteID: UUID?
 
     private var notesBySessionID: [UUID: CuratedNote] = [:]
     private var outputsBySessionID: [UUID: [GeneratedOutput]] = [:]
@@ -171,7 +172,11 @@ public final class PhaseOneViewModel: ObservableObject {
     }
 
     public func shouldShowProcessing(for session: CaptureSession) -> Bool {
-        session.status == .processing ||
+        let sourceType = primarySourceType(for: session.id)
+        if sourceType == .liveAudio || sourceType == .uploadedAudio {
+            return session.status == .processing && isCreatingCuratedNote(for: session.id)
+        }
+        return session.status == .processing ||
             session.status == .completed ||
             activeStage != nil ||
             !completedStages.isEmpty ||
@@ -225,6 +230,10 @@ public final class PhaseOneViewModel: ObservableObject {
             try await container.sessions.save(updatedSession)
             try await container.curatedNotes.save(updatedNote)
             selectedSession = updatedSession
+            if let index = sessions.firstIndex(where: { $0.id == updatedSession.id }) {
+                sessions[index] = updatedSession
+            }
+            notesBySessionID[session.id] = updatedNote
             await refreshPublishedState()
         } catch {
             errorMessage = "The suggested title could not be saved."
@@ -263,6 +272,7 @@ public final class PhaseOneViewModel: ObservableObject {
         do {
             try await container.curatedNotes.save(updated)
             await refreshPublishedState()
+            recentlySavedCuratedNoteID = updated.id
         } catch {
             errorMessage = "The Curated Note could not be saved."
         }
