@@ -77,6 +77,22 @@ public enum OutputType: String, Codable, CaseIterable, Sendable {
     case custom
 }
 
+public enum CuratedNoteGenerationStatus: String, Codable, CaseIterable, Sendable {
+    case notStarted
+    case preparing
+    case transcribing
+    case buildingCuratedNote
+    case completed
+    case failed
+    case cancelled
+}
+
+public enum ActionEvidenceState: String, Codable, CaseIterable, Sendable {
+    case explicit
+    case stronglySupported
+    case uncertain
+}
+
 public enum VisualBriefLayout: String, Codable, CaseIterable, Sendable {
     case onePageSummary
     case timeline
@@ -86,6 +102,53 @@ public enum VisualBriefLayout: String, Codable, CaseIterable, Sendable {
     case quoteLayout
     case keyStatistics
     case carouselPlan
+}
+
+public struct TranscriptSegment: Identifiable, Codable, Equatable, Sendable {
+    public var id: UUID
+    public var startTime: TimeInterval?
+    public var endTime: TimeInterval?
+    public var text: String
+    public var confidence: Double?
+
+    public init(
+        id: UUID = UUID(),
+        startTime: TimeInterval? = nil,
+        endTime: TimeInterval? = nil,
+        text: String,
+        confidence: Double? = nil
+    ) {
+        self.id = id
+        self.startTime = startTime
+        self.endTime = endTime
+        self.text = text
+        self.confidence = confidence
+    }
+}
+
+public struct CuratedActionItem: Identifiable, Codable, Equatable, Sendable {
+    public var id: UUID
+    public var title: String
+    public var supportingExcerpt: String?
+    public var timestamp: TimeInterval?
+    public var isCompleted: Bool
+    public var evidenceState: ActionEvidenceState
+
+    public init(
+        id: UUID = UUID(),
+        title: String,
+        supportingExcerpt: String? = nil,
+        timestamp: TimeInterval? = nil,
+        isCompleted: Bool = false,
+        evidenceState: ActionEvidenceState = .explicit
+    ) {
+        self.id = id
+        self.title = title
+        self.supportingExcerpt = supportingExcerpt
+        self.timestamp = timestamp
+        self.isCompleted = isCompleted
+        self.evidenceState = evidenceState
+    }
 }
 
 public struct EvidenceReference: Identifiable, Codable, Equatable, Sendable {
@@ -245,6 +308,7 @@ public struct ProcessingJob: Identifiable, Codable, Equatable, Sendable {
 public struct CuratedNote: Identifiable, Codable, Equatable, Sendable {
     public var id: UUID
     public var sessionID: UUID
+    public var captureSessionID: UUID { sessionID }
     public var schemaVersion: String
     public var promptVersion: String
     public var title: String
@@ -266,11 +330,62 @@ public struct CuratedNote: Identifiable, Codable, Equatable, Sendable {
     public var confidence: Double
     public var evidenceReferences: [EvidenceReference]
     public var createdAt: Date
+    public var updatedAt: Date
+    public var sourceType: CaptureSourceType?
+    public var transcript: String
+    public var transcriptSegments: [TranscriptSegment]
+    public var suggestedTitle: String?
+    public var confirmedTitle: String?
+    public var summary: String
+    public var keyPoints: [String]
+    public var structuredActionItems: [CuratedActionItem]
+    public var userNotes: String
+    public var generationStatus: CuratedNoteGenerationStatus
+    public var generationError: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case sessionID
+        case captureSessionID
+        case schemaVersion
+        case promptVersion
+        case title
+        case smartSummary
+        case detailedSummary
+        case keyIdeas
+        case quotes
+        case decisions
+        case actionItems
+        case dates
+        case people
+        case organizations
+        case projects
+        case risks
+        case questions
+        case visualObservations
+        case tags
+        case uncertainties
+        case confidence
+        case evidenceReferences
+        case createdAt
+        case updatedAt
+        case sourceType
+        case transcript
+        case transcriptSegments
+        case suggestedTitle
+        case confirmedTitle
+        case summary
+        case keyPoints
+        case structuredActionItems
+        case userNotes
+        case generationStatus
+        case generationError
+    }
 
     public init(
         id: UUID = UUID(),
         sessionID: UUID,
-        schemaVersion: String = "1.0",
+        schemaVersion: String = "2.1",
         promptVersion: String = "1.0",
         title: String,
         smartSummary: String,
@@ -290,7 +405,19 @@ public struct CuratedNote: Identifiable, Codable, Equatable, Sendable {
         uncertainties: [String] = [],
         confidence: Double = 0,
         evidenceReferences: [EvidenceReference] = [],
-        createdAt: Date = Date()
+        createdAt: Date = Date(),
+        updatedAt: Date = Date(),
+        sourceType: CaptureSourceType? = nil,
+        transcript: String = "",
+        transcriptSegments: [TranscriptSegment] = [],
+        suggestedTitle: String? = nil,
+        confirmedTitle: String? = nil,
+        summary: String? = nil,
+        keyPoints: [String]? = nil,
+        structuredActionItems: [CuratedActionItem] = [],
+        userNotes: String = "",
+        generationStatus: CuratedNoteGenerationStatus = .completed,
+        generationError: String? = nil
     ) {
         self.id = id
         self.sessionID = sessionID
@@ -315,6 +442,101 @@ public struct CuratedNote: Identifiable, Codable, Equatable, Sendable {
         self.confidence = confidence
         self.evidenceReferences = evidenceReferences
         self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.sourceType = sourceType
+        self.transcript = transcript
+        self.transcriptSegments = transcriptSegments
+        self.suggestedTitle = suggestedTitle
+        self.confirmedTitle = confirmedTitle
+        self.summary = summary ?? smartSummary
+        self.keyPoints = keyPoints ?? keyIdeas
+        self.structuredActionItems = structuredActionItems
+        self.userNotes = userNotes
+        self.generationStatus = generationStatus
+        self.generationError = generationError
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        sessionID = try container.decodeIfPresent(UUID.self, forKey: .sessionID)
+            ?? container.decode(UUID.self, forKey: .captureSessionID)
+        schemaVersion = try container.decodeIfPresent(String.self, forKey: .schemaVersion) ?? "1.0"
+        promptVersion = try container.decodeIfPresent(String.self, forKey: .promptVersion) ?? "1.0"
+        title = try container.decodeIfPresent(String.self, forKey: .title) ?? "Curated Note"
+        smartSummary = try container.decodeIfPresent(String.self, forKey: .smartSummary)
+            ?? container.decodeIfPresent(String.self, forKey: .summary)
+            ?? ""
+        detailedSummary = try container.decodeIfPresent(String.self, forKey: .detailedSummary) ?? ""
+        keyIdeas = try container.decodeIfPresent([String].self, forKey: .keyIdeas)
+            ?? container.decodeIfPresent([String].self, forKey: .keyPoints)
+            ?? []
+        quotes = try container.decodeIfPresent([String].self, forKey: .quotes) ?? []
+        decisions = try container.decodeIfPresent([String].self, forKey: .decisions) ?? []
+        actionItems = try container.decodeIfPresent([String].self, forKey: .actionItems) ?? []
+        dates = try container.decodeIfPresent([String].self, forKey: .dates) ?? []
+        people = try container.decodeIfPresent([String].self, forKey: .people) ?? []
+        organizations = try container.decodeIfPresent([String].self, forKey: .organizations) ?? []
+        projects = try container.decodeIfPresent([String].self, forKey: .projects) ?? []
+        risks = try container.decodeIfPresent([String].self, forKey: .risks) ?? []
+        questions = try container.decodeIfPresent([String].self, forKey: .questions) ?? []
+        visualObservations = try container.decodeIfPresent([String].self, forKey: .visualObservations) ?? []
+        tags = try container.decodeIfPresent([String].self, forKey: .tags) ?? []
+        uncertainties = try container.decodeIfPresent([String].self, forKey: .uncertainties) ?? []
+        confidence = try container.decodeIfPresent(Double.self, forKey: .confidence) ?? 0
+        evidenceReferences = try container.decodeIfPresent([EvidenceReference].self, forKey: .evidenceReferences) ?? []
+        createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
+        updatedAt = try container.decodeIfPresent(Date.self, forKey: .updatedAt) ?? createdAt
+        sourceType = try container.decodeIfPresent(CaptureSourceType.self, forKey: .sourceType)
+        transcript = try container.decodeIfPresent(String.self, forKey: .transcript) ?? ""
+        transcriptSegments = try container.decodeIfPresent([TranscriptSegment].self, forKey: .transcriptSegments) ?? []
+        suggestedTitle = try container.decodeIfPresent(String.self, forKey: .suggestedTitle)
+        confirmedTitle = try container.decodeIfPresent(String.self, forKey: .confirmedTitle)
+        summary = try container.decodeIfPresent(String.self, forKey: .summary) ?? smartSummary
+        keyPoints = try container.decodeIfPresent([String].self, forKey: .keyPoints) ?? keyIdeas
+        structuredActionItems = try container.decodeIfPresent([CuratedActionItem].self, forKey: .structuredActionItems) ?? []
+        userNotes = try container.decodeIfPresent(String.self, forKey: .userNotes) ?? ""
+        generationStatus = try container.decodeIfPresent(CuratedNoteGenerationStatus.self, forKey: .generationStatus) ?? .completed
+        generationError = try container.decodeIfPresent(String.self, forKey: .generationError)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(sessionID, forKey: .sessionID)
+        try container.encode(schemaVersion, forKey: .schemaVersion)
+        try container.encode(promptVersion, forKey: .promptVersion)
+        try container.encode(title, forKey: .title)
+        try container.encode(smartSummary, forKey: .smartSummary)
+        try container.encode(detailedSummary, forKey: .detailedSummary)
+        try container.encode(keyIdeas, forKey: .keyIdeas)
+        try container.encode(quotes, forKey: .quotes)
+        try container.encode(decisions, forKey: .decisions)
+        try container.encode(actionItems, forKey: .actionItems)
+        try container.encode(dates, forKey: .dates)
+        try container.encode(people, forKey: .people)
+        try container.encode(organizations, forKey: .organizations)
+        try container.encode(projects, forKey: .projects)
+        try container.encode(risks, forKey: .risks)
+        try container.encode(questions, forKey: .questions)
+        try container.encode(visualObservations, forKey: .visualObservations)
+        try container.encode(tags, forKey: .tags)
+        try container.encode(uncertainties, forKey: .uncertainties)
+        try container.encode(confidence, forKey: .confidence)
+        try container.encode(evidenceReferences, forKey: .evidenceReferences)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(updatedAt, forKey: .updatedAt)
+        try container.encodeIfPresent(sourceType, forKey: .sourceType)
+        try container.encode(transcript, forKey: .transcript)
+        try container.encode(transcriptSegments, forKey: .transcriptSegments)
+        try container.encodeIfPresent(suggestedTitle, forKey: .suggestedTitle)
+        try container.encodeIfPresent(confirmedTitle, forKey: .confirmedTitle)
+        try container.encode(summary, forKey: .summary)
+        try container.encode(keyPoints, forKey: .keyPoints)
+        try container.encode(structuredActionItems, forKey: .structuredActionItems)
+        try container.encode(userNotes, forKey: .userNotes)
+        try container.encode(generationStatus, forKey: .generationStatus)
+        try container.encodeIfPresent(generationError, forKey: .generationError)
     }
 }
 

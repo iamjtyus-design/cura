@@ -16,6 +16,7 @@ public struct DependencyContainer {
     public var libraryMaintenance: (any LocalLibraryMaintenance)?
     public var audioRecorder: any AudioRecordingProviding
     public var audioPlayback: any AudioPlaybackProviding
+    public var transcription: any TranscriptionProviding
     public var processing: any ProcessingProviding
     public var export: any ExportProviding
     public var quickSend: any QuickSendProviding
@@ -40,6 +41,7 @@ public struct DependencyContainer {
         libraryMaintenance: (any LocalLibraryMaintenance)? = nil,
         audioRecorder: any AudioRecordingProviding,
         audioPlayback: any AudioPlaybackProviding,
+        transcription: any TranscriptionProviding,
         processing: any ProcessingProviding,
         export: any ExportProviding,
         quickSend: any QuickSendProviding,
@@ -63,6 +65,7 @@ public struct DependencyContainer {
         self.libraryMaintenance = libraryMaintenance
         self.audioRecorder = audioRecorder
         self.audioPlayback = audioPlayback
+        self.transcription = transcription
         self.processing = processing
         self.export = export
         self.quickSend = quickSend
@@ -100,7 +103,8 @@ public struct DependencyContainer {
         processingShouldFail: Bool = false,
         quickSendShouldOpenInstagram: Bool = false,
         audioRecorder: (any AudioRecordingProviding)? = nil,
-        audioPlayback: (any AudioPlaybackProviding)? = nil
+        audioPlayback: (any AudioPlaybackProviding)? = nil,
+        transcription: (any TranscriptionProviding)? = nil
     ) -> DependencyContainer {
         let mediaStorage = InMemoryMediaFileStorage()
         return DependencyContainer(
@@ -119,6 +123,7 @@ public struct DependencyContainer {
             libraryMaintenance: mediaStorage,
             audioRecorder: audioRecorder ?? MockAudioRecordingProvider(),
             audioPlayback: audioPlayback ?? MockAudioPlaybackProvider(),
+            transcription: transcription ?? MockTranscriptionProvider(stageDelayNanoseconds: processingStageDelayNanoseconds),
             processing: MockProcessingProvider(
                 stageDelayNanoseconds: processingStageDelayNanoseconds,
                 shouldFail: processingShouldFail
@@ -136,7 +141,8 @@ public struct DependencyContainer {
         configuration: AppConfiguration,
         rootDirectory: URL? = nil,
         audioRecorder: (any AudioRecordingProviding)? = nil,
-        audioPlayback: (any AudioPlaybackProviding)? = nil
+        audioPlayback: (any AudioPlaybackProviding)? = nil,
+        transcription: (any TranscriptionProviding)? = nil
     ) -> DependencyContainer {
         let root = rootDirectory ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("CURA")
@@ -164,6 +170,7 @@ public struct DependencyContainer {
             libraryMaintenance: store,
             audioRecorder: recorder,
             audioPlayback: playback,
+            transcription: transcription ?? MockTranscriptionProvider(),
             processing: MockProcessingProvider(),
             export: MockExportProvider(),
             quickSend: MockQuickSendProvider(),

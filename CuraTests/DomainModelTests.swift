@@ -22,8 +22,9 @@ final class DomainModelTests: XCTestCase {
             evidenceReferences: [evidence]
         )
 
-        XCTAssertEqual(note.schemaVersion, "1.0")
+        XCTAssertEqual(note.schemaVersion, "2.1")
         XCTAssertEqual(note.promptVersion, "1.0")
         XCTAssertEqual(note.evidenceReferences.first?.sourceID, sourceID)
+        XCTAssertEqual(note.generationStatus, .completed)
     }
 }

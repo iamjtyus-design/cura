@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 2A reliable local audio capture is implemented and verified through the Phase 2A.2 physical-device polish pass. Phase 2B has not started.
+Phase 2B.1 audio transcription and the first editable Curated Note are implemented with a deterministic local demo/mock provider. Production transcription, cloud upload, live AI generation, Supabase, RevenueCat, authentication, and Phase 2B.2 work have not started.
 
 ## Completed
 
@@ -75,6 +75,13 @@ Phase 2A reliable local audio capture is implemented and verified through the Ph
 67. Create mode as the default for newly created audio sessions.
 68. Top-of-detail editable session title with the duplicate lower title control removed.
 69. Static Smart/Private current-build presentation that marks Smart enhancements unavailable until a later approved phase.
+70. `TranscriptionProviding` protocol with progress, transcript result, cancellation, and error boundaries.
+71. Deterministic `MockTranscriptionProvider` named `local-demo-mock` for the Phase 2B.1 local/demo slice.
+72. User-initiated audio Curated Note processing with Preparing Audio, Transcribing, Building Curated Note, and Ready stages.
+73. Audio Curated Note persistence with transcript, timestamped transcript segments, suggested title, confirmed title, editable summary, key points, structured action items, user notes, generation status, generation error, and schema version 2.1.
+74. Suggested-title flow that keeps manual session titles intact unless the user accepts or edits the suggestion.
+75. Session Detail audio tabs for Curated Note, Transcript, and Recording.
+76. Retry, cancellation, failure preservation, empty-transcript handling, and legacy Curated Note migration coverage.
 
 ## Verification
 
@@ -82,11 +89,11 @@ Phase 2A reliable local audio capture is implemented and verified through the Ph
 2. `xcodebuild -project Cura.xcodeproj -target CuraApp -sdk iphonesimulator build` passes.
 3. `xcodebuild -project Cura.xcodeproj -target CuraTests -sdk iphonesimulator build` passes.
 4. `xcodebuild -project Cura.xcodeproj -target CuraUITests -sdk iphonesimulator build` passes.
-5. `swift test` passes 32 tests.
+5. `swift test` passes 39 tests.
 6. `swift run CuraSmokeTests` passes.
 7. `sh scripts/secret_scan.sh` passes.
 8. `xcodebuild -project Cura.xcodeproj -scheme CuraApp -destination 'id=0001DB82-B759-4301-AB9C-F79DC34B9867' test` passes.
-9. Native scheme-level verification executed 32 unit tests and 2 UI tests with 0 failures.
+9. Native scheme-level verification executed 39 unit tests and 3 UI tests with 0 failures in the latest full run.
 10. Device Debug build for connected iPhone `00008150-001643EA0C3A401C` passes when the local development team is supplied outside committed source.
 11. `Cura.app` and embedded `CuraCore.framework` pass `codesign` verification.
 12. `otool -D` verifies embedded `CuraCore.framework` uses `@rpath/CuraCore.framework/CuraCore`.
@@ -106,6 +113,13 @@ Phase 2A reliable local audio capture is implemented and verified through the Ph
 26. Phase 2A.2 device Debug build passed for connected iPhone `00008150-001643EA0C3A401C`.
 27. `xcrun devicectl device install app` installed the Phase 2A.2 build successfully.
 28. `xcrun devicectl device process launch --terminate-existing com.visionbuilt.cura` launched the Phase 2A.2 build successfully.
+29. Phase 2B.1 Swift package tests passed with 39 tests.
+30. Phase 2B.1 smoke test passed.
+31. Phase 2B.1 secret scan passed after documentation updates.
+32. Phase 2B.1 device Debug build passed for connected iPhone `6A67316D-CE7A-5520-B8B7-BCAEBE23E5F3`.
+33. `Cura.app` and embedded `CuraCore.framework` passed code-signature verification for the Phase 2B.1 device build.
+34. `xcrun devicectl device install app` installed the Phase 2B.1 build successfully.
+35. `xcrun devicectl device process launch --terminate-existing com.visionbuilt.cura` launched the Phase 2B.1 build successfully.
 
 ## Blocked
 
@@ -132,13 +146,13 @@ Phase 2A reliable local audio capture is implemented and verified through the Ph
 10. Supabase integration.
 11. RevenueCat integration.
 12. Production persistence.
-13. Live transcription.
+13. Production transcription provider.
 14. Cloud upload.
-15. AI generation.
-16. Phase 2B.
-14. Video editing.
-15. Automatic publishing.
+15. Live AI generation.
+16. Phase 2B.2.
+17. Video editing.
+18. Automatic publishing.
 
 ## Next Milestone
 
-Phase 2A.2 satisfies the final physical-device audio polish checks available in this environment. The exact next recommended action is to approve Phase 2B scope before starting any transcription, cloud upload, AI generation, Supabase, authentication, RevenueCat, or other remote-service work.
+Phase 2B.1 satisfies the first local/demo transcription and editable Curated Note slice once final reruns, device launch, commit, and push are complete. The exact next recommended action after approval is Phase 2B.2 provider selection and production-transcription architecture, without starting cloud upload, Supabase, RevenueCat, authentication, or publishing until explicitly approved.

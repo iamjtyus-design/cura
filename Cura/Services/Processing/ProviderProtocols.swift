@@ -24,11 +24,59 @@ public struct CreatorPackProcessingResult: Equatable, Sendable {
     }
 }
 
+public struct TranscriptionProgress: Equatable, Sendable {
+    public var status: CuratedNoteGenerationStatus
+    public var fractionCompleted: Double?
+
+    public init(status: CuratedNoteGenerationStatus, fractionCompleted: Double? = nil) {
+        self.status = status
+        self.fractionCompleted = fractionCompleted
+    }
+}
+
+public struct TranscriptionResult: Equatable, Sendable {
+    public var transcript: String
+    public var segments: [TranscriptSegment]
+    public var suggestedTitle: String?
+    public var summary: String
+    public var keyPoints: [String]
+    public var actionItems: [CuratedActionItem]
+    public var providerName: String
+
+    public init(
+        transcript: String,
+        segments: [TranscriptSegment] = [],
+        suggestedTitle: String? = nil,
+        summary: String = "",
+        keyPoints: [String] = [],
+        actionItems: [CuratedActionItem] = [],
+        providerName: String
+    ) {
+        self.transcript = transcript
+        self.segments = segments
+        self.suggestedTitle = suggestedTitle
+        self.summary = summary
+        self.keyPoints = keyPoints
+        self.actionItems = actionItems
+        self.providerName = providerName
+    }
+}
+
 public enum ExportFormat: String, CaseIterable, Sendable {
     case markdown
     case plainText
     case json
     case pdf
+}
+
+public protocol TranscriptionProviding: Sendable {
+    var providerName: String { get }
+
+    func transcribe(
+        session: CaptureSession,
+        source: CaptureSource,
+        progress: @Sendable (TranscriptionProgress) async -> Void
+    ) async throws -> TranscriptionResult
 }
 
 public protocol ProcessingProviding: Sendable {

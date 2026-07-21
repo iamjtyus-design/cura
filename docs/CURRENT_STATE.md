@@ -1,6 +1,6 @@
 # Current State
 
-Phase 2A reliable local audio capture is implemented on top of the approved Phase 1.1 architecture cleanup.
+Phase 2B.1 audio transcription and the first editable Curated Note are implemented on top of the approved Phase 2A.2 local audio capture flow.
 
 Current foundation and Phase 1 slice:
 
@@ -61,6 +61,15 @@ Current foundation and Phase 1 slice:
 55. New capture sessions default to Create mode while preserving any later user-selected mode.
 56. Session Detail exposes the editable title at the top of the screen and removes the duplicate lower title control.
 57. Smart/Private presentation is static for the current build and clearly marks Smart enhancements as unavailable until a later approved phase.
+58. Audio sessions can start Curated Note processing only after the user deliberately taps Create Curated Note.
+59. Phase 2B.1 transcription is routed through `TranscriptionProviding` and currently uses a deterministic local demo/mock provider named `local-demo-mock`.
+60. Audio processing stages are Preparing Audio, Transcribing, Building Curated Note, and Ready, with cancel and retry behavior.
+61. Successful audio processing persists a schema 2.1 Curated Note with transcript, timestamped transcript segments, suggested title, summary, key points, structured action items, editable user notes, and generation status.
+62. Generated suggested titles do not overwrite the user's session title; users can accept, edit, or dismiss the suggestion.
+63. Session Detail now has Curated Note, Transcript, and Recording tabs for audio sessions.
+64. Transcript and generated Curated Note text can be copied only through explicit user taps.
+65. Failed processing preserves the original audio and Capture Session, stores the failure state, and exposes Retry.
+66. Legacy Curated Note JSON remains decodable through an in-model migration path without silent destructive migration.
 
 Verification on 2026-07-20:
 
@@ -70,11 +79,11 @@ Verification on 2026-07-20:
 4. `xcodebuild -project Cura.xcodeproj -target CuraApp -sdk iphonesimulator build` passes.
 5. `xcodebuild -project Cura.xcodeproj -target CuraTests -sdk iphonesimulator build` passes.
 6. `xcodebuild -project Cura.xcodeproj -target CuraUITests -sdk iphonesimulator build` passes.
-7. `swift test` passes with 19 tests.
+7. `swift test` passes with 39 tests.
 8. `swift run CuraSmokeTests` passes.
 9. `sh scripts/secret_scan.sh` passes.
 10. `xcodebuild -project Cura.xcodeproj -scheme CuraApp -destination 'id=0001DB82-B759-4301-AB9C-F79DC34B9867' test` passes.
-11. Native scheme-level tests executed 19 unit tests and 2 UI tests with 0 failures.
+11. Native scheme-level tests executed 39 unit tests and 3 UI tests with 0 failures in the latest full run.
 12. Phase 0 commit is pushed to `origin/main`.
 13. Phase 1 commit is pushed to `origin/main`.
 14. Phase 2A commit is pushed to `origin/main`.
@@ -83,7 +92,7 @@ Verification on 2026-07-20:
 17. `CuraCore.framework` uses an embedded-framework install name of `@rpath/CuraCore.framework/CuraCore`.
 18. `CuraApp` uses embedded-framework runpaths for `@executable_path/Frameworks` and `@loader_path/Frameworks`.
 
-No cloud upload, transcription, AI generation, Supabase, RevenueCat, authentication, or Phase 2B work has started.
+No cloud upload, production transcription service, live AI generation, Supabase, RevenueCat, authentication, social publishing, collaboration, calendar integration, full Output Packs, or Visual Brief generation has started. Phase 2B.1 uses local persistence and a clearly labeled deterministic demo transcription provider only.
 
 Signing verification on 2026-07-20:
 
@@ -158,3 +167,16 @@ Phase 2A.2 verification on 2026-07-20:
 9. Device Debug build passed for connected iPhone `00008150-001643EA0C3A401C` with the local development team supplied outside committed source.
 10. `xcrun devicectl device install app` installed `com.visionbuilt.cura` successfully.
 11. `xcrun devicectl device process launch --terminate-existing com.visionbuilt.cura` launched successfully.
+
+Phase 2B.1 verification on 2026-07-21:
+
+1. `swift test` passed with 39 tests.
+2. `xcodebuild -project Cura.xcodeproj -scheme CuraApp -destination 'id=0001DB82-B759-4301-AB9C-F79DC34B9867' test` passed in the latest full run with 39 unit tests and 3 UI tests.
+3. A targeted rerun of the primary audio transcription UI flow passed after the final UI-test helper cleanup.
+4. `swift run CuraSmokeTests` passed.
+5. `sh scripts/secret_scan.sh` passed after documentation updates.
+6. Device Debug build passed for connected iPhone `6A67316D-CE7A-5520-B8B7-BCAEBE23E5F3` with the local development team supplied outside committed source.
+7. `codesign --verify --deep --strict --verbose=2` passed for the device `Cura.app`.
+8. `codesign --verify --strict --verbose=2` passed for the embedded `CuraCore.framework`.
+9. `xcrun devicectl device install app` installed `com.visionbuilt.cura` successfully on the connected iPhone.
+10. `xcrun devicectl device process launch --terminate-existing com.visionbuilt.cura` launched successfully.

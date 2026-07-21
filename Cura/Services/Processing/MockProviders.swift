@@ -76,6 +76,124 @@ public struct MockProcessingProvider: ProcessingProviding {
     }
 }
 
+public struct MockTranscriptionProvider: TranscriptionProviding {
+    public enum MockTranscriptionError: Error, Equatable {
+        case requestedFailure
+    }
+
+    public var providerName: String
+    public var stageDelayNanoseconds: UInt64
+    public var shouldFail: Bool
+    public var shouldReturnEmptyTranscript: Bool
+
+    public init(
+        providerName: String = "local-demo-mock",
+        stageDelayNanoseconds: UInt64 = 250_000_000,
+        shouldFail: Bool = false,
+        shouldReturnEmptyTranscript: Bool = false
+    ) {
+        self.providerName = providerName
+        self.stageDelayNanoseconds = stageDelayNanoseconds
+        self.shouldFail = shouldFail
+        self.shouldReturnEmptyTranscript = shouldReturnEmptyTranscript
+    }
+
+    public func transcribe(
+        session: CaptureSession,
+        source: CaptureSource,
+        progress: @Sendable (TranscriptionProgress) async -> Void
+    ) async throws -> TranscriptionResult {
+        try Task.checkCancellation()
+        await progress(TranscriptionProgress(status: .preparing, fractionCompleted: 0.15))
+        try await Task.sleep(nanoseconds: stageDelayNanoseconds)
+        try Task.checkCancellation()
+
+        if shouldFail {
+            throw MockTranscriptionError.requestedFailure
+        }
+
+        await progress(TranscriptionProgress(status: .transcribing, fractionCompleted: 0.55))
+        try await Task.sleep(nanoseconds: stageDelayNanoseconds)
+        try Task.checkCancellation()
+
+        await progress(TranscriptionProgress(status: .buildingCuratedNote, fractionCompleted: 0.85))
+        try await Task.sleep(nanoseconds: stageDelayNanoseconds)
+        try Task.checkCancellation()
+
+        if shouldReturnEmptyTranscript {
+            return TranscriptionResult(
+                transcript: "",
+                segments: [],
+                suggestedTitle: nil,
+                summary: "",
+                keyPoints: [],
+                actionItems: [],
+                providerName: providerName
+            )
+        }
+
+        let transcript = "Today I recorded a field memo about the launch checklist. Review the audio capture flow, confirm the folder setup, and prepare the next transcription decision before Friday."
+        let segments = [
+            TranscriptSegment(
+                startTime: 0,
+                endTime: 6,
+                text: "Today I recorded a field memo about the launch checklist.",
+                confidence: 0.98
+            ),
+            TranscriptSegment(
+                startTime: 6,
+                endTime: 14,
+                text: "Review the audio capture flow, confirm the folder setup, and prepare the next transcription decision before Friday.",
+                confidence: 0.96
+            )
+        ]
+        let actions = [
+            CuratedActionItem(
+                title: "Review the audio capture flow",
+                supportingExcerpt: "Review the audio capture flow",
+                timestamp: 6,
+                evidenceState: .explicit
+            ),
+            CuratedActionItem(
+                title: "Confirm the folder setup",
+                supportingExcerpt: "confirm the folder setup",
+                timestamp: 8,
+                evidenceState: .explicit
+            ),
+            CuratedActionItem(
+                title: "Prepare the next transcription decision before Friday",
+                supportingExcerpt: "prepare the next transcription decision before Friday",
+                timestamp: 10,
+                evidenceState: .stronglySupported
+            )
+        ]
+
+        return TranscriptionResult(
+            transcript: transcript,
+            segments: segments,
+            suggestedTitle: suggestedTitle(from: transcript),
+            summary: "A field memo captured the launch checklist and the next decisions needed for the audio transcription path.",
+            keyPoints: [
+                "The recording is a field memo about the launch checklist.",
+                "Audio capture flow and folder setup need review.",
+                "The next transcription decision should be prepared before Friday."
+            ],
+            actionItems: actions,
+            providerName: providerName
+        )
+    }
+
+    private func suggestedTitle(from transcript: String) -> String? {
+        let meaningfulWords = transcript
+            .split { !$0.isLetter && !$0.isNumber }
+            .map(String.init)
+            .filter { $0.count > 2 }
+
+        guard meaningfulWords.count >= 4 else { return nil }
+        return "Launch Checklist Field Memo"
+    }
+}
+
 public struct MockExportProvider: ExportProviding {
     public init() {}
 

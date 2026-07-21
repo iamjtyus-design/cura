@@ -36,6 +36,7 @@
 		300000000000000000000104 /* AudioPlaybackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000004 /* AudioPlaybackView.swift */; };
 		300000000000000000000105 /* AudioRecordingProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000005 /* AudioRecordingProviders.swift */; };
 		300000000000000000000106 /* AudioRecordingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000006 /* AudioRecordingTests.swift */; };
+		500000000000000000000101 /* AudioTranscriptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500000000000000000000001 /* AudioTranscriptionTests.swift */; };
 		400000000000000000000111 /* CuraCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 400000000000000000000020 /* CuraCore.framework */; };
 		400000000000000000000112 /* CuraCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 400000000000000000000020 /* CuraCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		400000000000000000000115 /* CuraCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 400000000000000000000020 /* CuraCore.framework */; };
@@ -108,6 +109,7 @@
 		300000000000000000000004 /* AudioPlaybackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlaybackView.swift; sourceTree = "<group>"; };
 		300000000000000000000005 /* AudioRecordingProviders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecordingProviders.swift; sourceTree = "<group>"; };
 		300000000000000000000006 /* AudioRecordingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecordingTests.swift; sourceTree = "<group>"; };
+		500000000000000000000001 /* AudioTranscriptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTranscriptionTests.swift; sourceTree = "<group>"; };
 		400000000000000000000020 /* CuraCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CuraCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -243,6 +245,7 @@
 				100000000000000000000014 /* DependencyContainerTests.swift */,
 				200000000000000000000010 /* PhaseOneViewModelTests.swift */,
 				300000000000000000000006 /* AudioRecordingTests.swift */,
+				500000000000000000000001 /* AudioTranscriptionTests.swift */,
 			);
 			path = CuraTests;
 			sourceTree = "<group>";
@@ -521,6 +524,7 @@
 				100000000000000000000114 /* DependencyContainerTests.swift in Sources */,
 				200000000000000000000110 /* PhaseOneViewModelTests.swift in Sources */,
 				300000000000000000000106 /* AudioRecordingTests.swift in Sources */,
+				500000000000000000000101 /* AudioTranscriptionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

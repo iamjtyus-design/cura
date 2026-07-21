@@ -18,10 +18,12 @@ public final class PhaseOneViewModel: ObservableObject {
     @Published public var errorMessage = ""
     @Published public var shareItem: ShareItem?
     @Published public var showingAudioRecorder = false
+    @Published public var curatedNoteProgressBySessionID: [UUID: TranscriptionProgress] = [:]
 
     private var notesBySessionID: [UUID: CuratedNote] = [:]
     private var outputsBySessionID: [UUID: [GeneratedOutput]] = [:]
     private var sourcesBySessionID: [UUID: [CaptureSource]] = [:]
+    private var curatedNoteTasksBySessionID: [UUID: Task<Void, Never>] = [:]
     private var didLoad = false
     private let container: DependencyContainer
     private let isUITesting: Bool
@@ -177,6 +179,95 @@ public final class PhaseOneViewModel: ObservableObject {
             instagramCaption(for: session.id) != nil
     }
 
+    public func isCreatingCuratedNote(for sessionID: UUID) -> Bool {
+        curatedNoteTasksBySessionID[sessionID] != nil
+    }
+
+    public func curatedNoteProgress(for sessionID: UUID) -> TranscriptionProgress? {
+        curatedNoteProgressBySessionID[sessionID]
+    }
+
+    public func startCuratedNoteProcessing(for session: CaptureSession) {
+        guard curatedNoteTasksBySessionID[session.id] == nil else { return }
+        let task = Task { [weak self] in
+            guard let self else { return }
+            await self.runCuratedNoteProcessing(for: session)
+        }
+        curatedNoteTasksBySessionID[session.id] = task
+    }
+
+    public func retryCuratedNoteProcessing(for session: CaptureSession) {
+        curatedNoteProgressBySessionID[session.id] = nil
+        startCuratedNoteProcessing(for: session)
+    }
+
+    public func cancelCuratedNoteProcessing(for sessionID: UUID) {
+        curatedNoteTasksBySessionID[sessionID]?.cancel()
+        curatedNoteTasksBySessionID[sessionID] = nil
+        curatedNoteProgressBySessionID[sessionID] = TranscriptionProgress(status: .cancelled, fractionCompleted: nil)
+    }
+
+    public func acceptSuggestedTitle(for session: CaptureSession, note: CuratedNote, editedTitle: String? = nil) async {
+        let candidate = (editedTitle ?? note.suggestedTitle ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !candidate.isEmpty else { return }
+
+        var updatedSession = session
+        updatedSession.title = candidate
+        updatedSession.updatedAt = Date()
+
+        var updatedNote = note
+        updatedNote.confirmedTitle = candidate
+        updatedNote.title = candidate
+        updatedNote.updatedAt = Date()
+
+        do {
+            try await container.sessions.save(updatedSession)
+            try await container.curatedNotes.save(updatedNote)
+            selectedSession = updatedSession
+            await refreshPublishedState()
+        } catch {
+            errorMessage = "The suggested title could not be saved."
+        }
+    }
+
+    public func dismissSuggestedTitle(_ note: CuratedNote) async {
+        var updatedNote = note
+        updatedNote.suggestedTitle = nil
+        updatedNote.updatedAt = Date()
+        do {
+            try await container.curatedNotes.save(updatedNote)
+            await refreshPublishedState()
+        } catch {
+            errorMessage = "The title suggestion could not be dismissed."
+        }
+    }
+
+    public func saveCuratedNoteEdits(
+        _ note: CuratedNote,
+        summary: String,
+        keyPoints: [String],
+        actionItems: [CuratedActionItem],
+        userNotes: String
+    ) async {
+        var updated = note
+        updated.summary = summary
+        updated.smartSummary = summary
+        updated.keyPoints = keyPoints
+        updated.keyIdeas = keyPoints
+        updated.structuredActionItems = actionItems
+        updated.actionItems = actionItems.map(\.title)
+        updated.userNotes = userNotes
+        updated.updatedAt = Date()
+
+        do {
+            try await container.curatedNotes.save(updated)
+            await refreshPublishedState()
+        } catch {
+            errorMessage = "The Curated Note could not be saved."
+        }
+    }
+
     public func saveSessionMetadata(
         _ session: CaptureSession,
         title: String,
@@ -299,6 +390,115 @@ public final class PhaseOneViewModel: ObservableObject {
     private func mark(_ stage: PhaseOneProcessingStage) {
         activeStage = stage
         completedStages.insert(stage)
+    }
+
+    private func runCuratedNoteProcessing(for session: CaptureSession) async {
+        defer {
+            curatedNoteTasksBySessionID[session.id] = nil
+        }
+
+        guard let source = audioSource(for: session.id) ?? sources(for: session.id).first else {
+            errorMessage = "This session does not have a source to process."
+            return
+        }
+
+        var processingSession = session
+        processingSession.status = .processing
+        processingSession.updatedAt = Date()
+        curatedNoteProgressBySessionID[session.id] = TranscriptionProgress(status: .preparing, fractionCompleted: 0)
+
+        do {
+            try await container.sessions.save(processingSession)
+            selectedSession = processingSession
+            await refreshPublishedState()
+
+            let result = try await container.transcription.transcribe(session: processingSession, source: source) { [weak self] progress in
+                await MainActor.run {
+                    self?.curatedNoteProgressBySessionID[session.id] = progress
+                }
+            }
+
+            try Task.checkCancellation()
+            let now = Date()
+            let note = makeCuratedNote(
+                session: processingSession,
+                source: source,
+                result: result,
+                now: now
+            )
+
+            var completedSession = processingSession
+            completedSession.status = .completed
+            completedSession.updatedAt = now
+            try await container.curatedNotes.save(note)
+            try await container.sessions.save(completedSession)
+            curatedNoteProgressBySessionID[session.id] = TranscriptionProgress(status: .completed, fractionCompleted: 1)
+            selectedSession = completedSession
+            await refreshPublishedState()
+        } catch is CancellationError {
+            var cancelledSession = processingSession
+            cancelledSession.status = .ready
+            cancelledSession.updatedAt = Date()
+            try? await container.sessions.save(cancelledSession)
+            curatedNoteProgressBySessionID[session.id] = TranscriptionProgress(status: .cancelled, fractionCompleted: nil)
+            selectedSession = cancelledSession
+            await refreshPublishedState()
+        } catch {
+            var failedSession = processingSession
+            failedSession.status = .failed
+            failedSession.updatedAt = Date()
+            let failedNote = CuratedNote(
+                sessionID: session.id,
+                title: session.title,
+                smartSummary: "",
+                sourceType: source.sourceType,
+                generationStatus: .failed,
+                generationError: "Transcription failed. The original recording is still available."
+            )
+            try? await container.curatedNotes.save(failedNote)
+            try? await container.sessions.save(failedSession)
+            curatedNoteProgressBySessionID[session.id] = TranscriptionProgress(status: .failed, fractionCompleted: nil)
+            selectedSession = failedSession
+            errorMessage = "Transcription failed. Your recording remains in the local library."
+            await refreshPublishedState()
+        }
+    }
+
+    private func makeCuratedNote(
+        session: CaptureSession,
+        source: CaptureSource,
+        result: TranscriptionResult,
+        now: Date
+    ) -> CuratedNote {
+        let transcript = result.transcript.trimmingCharacters(in: .whitespacesAndNewlines)
+        let suggestedTitle = transcript.isEmpty ? nil : result.suggestedTitle
+        let displayTitle = session.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Audio Recording" : session.title
+
+        return CuratedNote(
+            sessionID: session.id,
+            schemaVersion: "2.1",
+            promptVersion: result.providerName,
+            title: displayTitle,
+            smartSummary: result.summary,
+            detailedSummary: result.summary,
+            keyIdeas: result.keyPoints,
+            actionItems: result.actionItems.map(\.title),
+            tags: ["audio", "transcription", "curated-note"],
+            confidence: transcript.isEmpty ? 0 : 0.95,
+            createdAt: now,
+            updatedAt: now,
+            sourceType: source.sourceType,
+            transcript: transcript,
+            transcriptSegments: result.segments,
+            suggestedTitle: suggestedTitle,
+            confirmedTitle: nil,
+            summary: result.summary,
+            keyPoints: result.keyPoints,
+            structuredActionItems: result.actionItems,
+            userNotes: "",
+            generationStatus: .completed,
+            generationError: nil
+        )
     }
 
     private func isSupportedVideo(_ url: URL) -> Bool {

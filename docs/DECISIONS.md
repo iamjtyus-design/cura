@@ -362,3 +362,18 @@
 1. Existing persisted sessions remain compatible with the `processingMode` field.
 2. Users see that current processing remains local/mock in this build.
 3. Smart enhancements are clearly marked unavailable until a later approved phase.
+
+## D-031: Phase 2B.1 deterministic transcription provider
+
+**Date:** 2026-07-21
+
+**Decision:** Implement the first audio transcription and Curated Note slice behind `TranscriptionProviding` with a deterministic local demo/mock provider named `local-demo-mock`.
+
+**Reason:** Phase 2B.1 needs the user-initiated processing, persistence, editing, retry, cancellation, and UI architecture for transcript-backed Curated Notes, but no production transcription credential, server component, or approved Apple Speech production decision exists yet.
+
+**Consequences:**
+
+1. The app can prove the post-recording Curated Note flow without uploading audio or connecting live AI.
+2. The provider emits predictable transcript segments, summary, key points, and action items for reliable unit and UI testing.
+3. CURA does not claim production-grade, on-device, private, or cloud transcription behavior in this build.
+4. Phase 2B.2 should decide and validate the production transcription architecture before any live provider is connected.
