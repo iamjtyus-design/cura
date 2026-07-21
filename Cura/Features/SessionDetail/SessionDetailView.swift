@@ -31,10 +31,12 @@ public struct SessionDetailView: View {
             VStack(alignment: .leading, spacing: 20) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(session.title)
+                        TextField("Session title", text: $title)
                             .font(.title2.weight(.semibold))
-                            .accessibilityIdentifier("sessionTitle")
-                        Text("\(session.mode.displayName) • \(session.processingMode.displayName)")
+                            .textFieldStyle(.plain)
+                            .accessibilityLabel("Session title")
+                            .accessibilityIdentifier("topSessionTitleField")
+                        Text("\(mode.displayName) • Local processing")
                             .foregroundStyle(.secondary)
                     }
                     Spacer()
@@ -65,9 +67,6 @@ public struct SessionDetailView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Session Details")
                         .font(.headline)
-                    TextField("Title", text: $title)
-                        .textFieldStyle(.roundedBorder)
-                        .accessibilityLabel("Session title")
                     Picker("Mode", selection: $mode) {
                         ForEach(CaptureMode.allCases, id: \.self) { mode in
                             Text(mode.displayName).tag(mode)
@@ -98,13 +97,13 @@ public struct SessionDetailView: View {
                         .accessibilityLabel("Add Folder")
                     }
 
-                    Picker("Processing Mode", selection: $processingMode) {
-                        Text("Private").tag(ProcessingMode.private)
-                        Text("Smart").tag(ProcessingMode.smart)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Processing")
+                            .font(.subheadline.weight(.semibold))
+                        Text("Private and Smart currently use the same local mock processing in this build. Smart enhancements are unavailable until a later approved phase.")
+                            .foregroundStyle(.secondary)
                     }
-                    Text(processingMode.guidance)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
 
                     Button("Save Session Details") {
                         Task {

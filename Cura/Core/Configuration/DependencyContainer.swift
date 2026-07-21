@@ -12,6 +12,7 @@ public struct DependencyContainer {
     public var generatedOutputs: any GeneratedOutputRepository
     public var mediaStorage: any MediaFileStorage
     public var audioRecovery: any AudioRecordingRecoveryRepository
+    public var audioConsent: any AudioConsentAcknowledgementRepository
     public var libraryMaintenance: (any LocalLibraryMaintenance)?
     public var audioRecorder: any AudioRecordingProviding
     public var audioPlayback: any AudioPlaybackProviding
@@ -35,6 +36,7 @@ public struct DependencyContainer {
         generatedOutputs: any GeneratedOutputRepository,
         mediaStorage: any MediaFileStorage,
         audioRecovery: any AudioRecordingRecoveryRepository,
+        audioConsent: any AudioConsentAcknowledgementRepository,
         libraryMaintenance: (any LocalLibraryMaintenance)? = nil,
         audioRecorder: any AudioRecordingProviding,
         audioPlayback: any AudioPlaybackProviding,
@@ -57,6 +59,7 @@ public struct DependencyContainer {
         self.generatedOutputs = generatedOutputs
         self.mediaStorage = mediaStorage
         self.audioRecovery = audioRecovery
+        self.audioConsent = audioConsent
         self.libraryMaintenance = libraryMaintenance
         self.audioRecorder = audioRecorder
         self.audioPlayback = audioPlayback
@@ -112,6 +115,7 @@ public struct DependencyContainer {
             generatedOutputs: InMemoryGeneratedOutputRepository(),
             mediaStorage: mediaStorage,
             audioRecovery: InMemoryAudioRecordingRecoveryRepository(),
+            audioConsent: InMemoryAudioConsentAcknowledgementRepository(),
             libraryMaintenance: mediaStorage,
             audioRecorder: audioRecorder ?? MockAudioRecordingProvider(),
             audioPlayback: audioPlayback ?? MockAudioPlaybackProvider(),
@@ -156,6 +160,7 @@ public struct DependencyContainer {
             generatedOutputs: store,
             mediaStorage: store,
             audioRecovery: store,
+            audioConsent: store,
             libraryMaintenance: store,
             audioRecorder: recorder,
             audioPlayback: playback,

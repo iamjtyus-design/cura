@@ -32,13 +32,13 @@ public struct SessionSetupView: View {
                 }
                 FolderComposer(model: model)
 
-                Picker("Processing Mode", selection: $model.setupProcessingMode) {
-                    Text("Private").tag(ProcessingMode.private)
-                    Text("Smart").tag(ProcessingMode.smart)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Processing")
+                        .font(.subheadline.weight(.semibold))
+                    Text("Private and Smart currently use the same local mock processing in this build. Smart enhancements are unavailable until a later approved phase.")
+                        .foregroundStyle(.secondary)
                 }
-                Text(model.setupProcessingMode.guidance)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
             }
 
             Section {

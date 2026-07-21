@@ -55,23 +55,39 @@ final class CuraUITests: XCTestCase {
         app.buttons["Stop and Save"].tap()
 
         XCTAssertTrue(app.staticTexts["Audio Recording"].waitForExistence(timeout: 5))
+        let titleField = app.textFields["topSessionTitleField"]
+        XCTAssertTrue(titleField.waitForExistence(timeout: 5))
+        titleField.replaceText(with: "Field Memo")
+        app.swipeUp()
+        XCTAssertTrue(app.buttons["Save Session Details"].waitForExistence(timeout: 5))
+        app.buttons["Save Session Details"].tap()
+        app.swipeDown()
         XCTAssertTrue(app.buttons["Play Recording"].exists)
         app.buttons["Play Recording"].tap()
         let playbackProgress = app.sliders["playbackProgress"]
         XCTAssertTrue(playbackProgress.waitForValueNotBeginning(with: "00:00 of", timeout: 4))
+        app.swipeUp()
         app.buttons["Back to Sessions"].tap()
-        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Audio Recording")).firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Field Memo")).firstMatch.waitForExistence(timeout: 5))
 
         app.terminate()
 
         let relaunched = XCUIApplication()
         relaunched.launchArguments = ["-ui-testing"]
         relaunched.launch()
-        XCTAssertTrue(relaunched.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Audio Recording")).firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(relaunched.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Field Memo")).firstMatch.waitForExistence(timeout: 5))
     }
 }
 
 private extension XCUIElement {
+    func replaceText(with text: String) {
+        tap()
+        if let current = value as? String, !current.isEmpty {
+            typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count))
+        }
+        typeText(text)
+    }
+
     func waitForLabelNotEqual(to value: String, timeout: TimeInterval) -> Bool {
         waitForPredicate(NSPredicate(format: "label != %@", value), timeout: timeout)
     }

@@ -55,6 +55,12 @@ Current foundation and Phase 1 slice:
 49. Processing stages are hidden until processing is initiated and use source-aware "Reading Audio" or "Reading Video" copy.
 50. Folder creation refreshes choices immediately and can assign the new folder to an existing session.
 51. Learn/Create/Work and Private/Smart helper text is present without implying Smart currently uploads anything.
+52. Phase 2A.2 prevents new audio captures from initializing playback until a saved recording exists.
+53. Missing or stale playback files now show an inline recovery message instead of a recording-level alert on new capture.
+54. Audio recording education consent is acknowledged once per local installation and versioned so it can reappear only when the consent text materially changes.
+55. New capture sessions default to Create mode while preserving any later user-selected mode.
+56. Session Detail exposes the editable title at the top of the screen and removes the duplicate lower title control.
+57. Smart/Private presentation is static for the current build and clearly marks Smart enhancements as unavailable until a later approved phase.
 
 Verification on 2026-07-20:
 
@@ -138,3 +144,17 @@ Phase 2A.1 verification on 2026-07-20:
 15. `xcrun devicectl device process launch --terminate-existing com.visionbuilt.cura` launched successfully.
 16. Physical-device UI automation passed the Phase 2A mock audio flow, including visible recording duration advancing beyond `00:00`, playback progress advancing beyond `00:00`, and relaunch persistence.
 17. Physical-device UI automation reported a non-fatal Apple diagnostics collection warning after test success.
+
+Phase 2A.2 verification on 2026-07-20:
+
+1. Root cause of the new-capture playback warning was stale playback/session state being reused when opening the recorder after a saved or missing playback URL had been loaded.
+2. `ContentView` now resets the audio recorder for a new capture before showing it, and `AudioRecordingViewModel` clears stale recovery metadata when its referenced file no longer exists.
+3. Playback is initialized only after a saved audio source exists; missing files produce inline "Recording playback cannot be loaded" state on the playback controls.
+4. Audio consent acknowledgement is stored in the local JSON library snapshot as a version string and can be reset by automated tests.
+5. New audio sessions are created with Create as the default mode.
+6. Simulator scheme-level tests passed on iPhone 17 Pro, iOS 26.5, UDID `0001DB82-B759-4301-AB9C-F79DC34B9867`, with 32 unit tests and 2 UI tests.
+7. `swift run CuraSmokeTests` passed.
+8. `sh scripts/secret_scan.sh` passed.
+9. Device Debug build passed for connected iPhone `00008150-001643EA0C3A401C` with the local development team supplied outside committed source.
+10. `xcrun devicectl device install app` installed `com.visionbuilt.cura` successfully.
+11. `xcrun devicectl device process launch --terminate-existing com.visionbuilt.cura` launched successfully.

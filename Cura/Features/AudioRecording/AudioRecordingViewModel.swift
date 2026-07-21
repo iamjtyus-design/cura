@@ -3,6 +3,8 @@ import SwiftUI
 
 @MainActor
 public final class AudioRecordingViewModel: ObservableObject {
+    public static let audioConsentVersion = "audio-recording-consent-v1"
+
     @Published public private(set) var state: AudioRecordingState = .idle
     @Published public private(set) var markers: [AudioMarker] = []
     @Published public private(set) var duration: TimeInterval = 0
@@ -12,6 +14,7 @@ public final class AudioRecordingViewModel: ObservableObject {
     @Published public private(set) var recoveredMetadata: AudioRecordingRecoveryMetadata?
     @Published public private(set) var savedSession: CaptureSession?
     @Published public private(set) var savedSource: CaptureSource?
+    @Published public private(set) var playbackUnavailableMessage = ""
     @Published public var showConsentNotice = false
     @Published public var errorMessage = ""
 
@@ -39,6 +42,12 @@ public final class AudioRecordingViewModel: ObservableObject {
         do {
             recoveredMetadata = try await container.audioRecovery.fetch()
             if let recoveredMetadata {
+                guard FileManager.default.fileExists(atPath: recoveredMetadata.fileURL.path) else {
+                    try await container.audioRecovery.clear()
+                    self.recoveredMetadata = nil
+                    resetCaptureState()
+                    return
+                }
                 activeSessionID = recoveredMetadata.sessionID
                 activeSourceID = recoveredMetadata.sourceID
                 activeFileURL = recoveredMetadata.fileURL
@@ -53,11 +62,37 @@ public final class AudioRecordingViewModel: ObservableObject {
     }
 
     public func recordTapped() async {
-        showConsentNotice = true
+        clearPlaybackState()
+        errorMessage = ""
+        do {
+            if try await container.audioConsent.acknowledgedAudioConsentVersion() == Self.audioConsentVersion {
+                await prepareForRecordingPermission()
+            } else {
+                showConsentNotice = true
+            }
+        } catch {
+            showConsentNotice = true
+        }
     }
 
     public func acceptConsentAndPrepare() async {
         showConsentNotice = false
+        try? await container.audioConsent.acknowledgeAudioConsent(version: Self.audioConsentVersion)
+        await prepareForRecordingPermission()
+    }
+
+    public func resetAudioConsentForTesting() async {
+        try? await container.audioConsent.resetAudioConsentAcknowledgement()
+    }
+
+    public func prepareForNewCapture() {
+        errorMessage = ""
+        showConsentNotice = false
+        resetCaptureState()
+        clearPlaybackState()
+    }
+
+    private func prepareForRecordingPermission() async {
         transition(to: .requestingPermission)
         let status = await container.audioRecorder.requestPermission()
         switch status {
@@ -142,7 +177,7 @@ public final class AudioRecordingViewModel: ObservableObject {
         do {
             let finalDuration = try await container.audioRecorder.stopRecording()
             let title = "Audio Recording"
-            let session = CaptureSession(id: sessionID, title: title, mode: .learn, status: .ready)
+            let session = CaptureSession(id: sessionID, title: title, mode: .create, status: .ready)
             let source = CaptureSource(
                 id: sourceID,
                 sessionID: sessionID,
@@ -199,12 +234,20 @@ public final class AudioRecordingViewModel: ObservableObject {
     }
 
     public func loadPlayback(url: URL) async {
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            clearPlaybackState()
+            playbackUnavailableMessage = "Recording file is no longer available on this device."
+            return
+        }
+
         do {
+            playbackUnavailableMessage = ""
             playbackDuration = try await container.audioPlayback.load(url: url)
             playbackPosition = await container.audioPlayback.currentTime()
             isPlaybackPlaying = false
         } catch {
-            errorMessage = "Recording playback could not be loaded."
+            clearPlaybackState()
+            playbackUnavailableMessage = "Recording playback is unavailable for this file."
         }
     }
 
@@ -267,6 +310,11 @@ public final class AudioRecordingViewModel: ObservableObject {
     private func resetLocalState() {
         stopRecordingTimer()
         stopPlaybackTimer()
+        resetCaptureState()
+        clearPlaybackState()
+    }
+
+    private func resetCaptureState() {
         activeSessionID = nil
         activeSourceID = nil
         activeFileURL = nil
@@ -276,11 +324,16 @@ public final class AudioRecordingViewModel: ObservableObject {
         recoveredMetadata = nil
         savedSession = nil
         savedSource = nil
+        machine = AudioRecordingStateMachine()
+        state = .idle
+    }
+
+    private func clearPlaybackState() {
+        stopPlaybackTimer()
         playbackDuration = 0
         playbackPosition = 0
         isPlaybackPlaying = false
-        machine = AudioRecordingStateMachine()
-        state = .idle
+        playbackUnavailableMessage = ""
     }
 
     private func startRecordingTimer() {

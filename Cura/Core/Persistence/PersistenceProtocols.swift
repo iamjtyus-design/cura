@@ -52,6 +52,12 @@ public protocol AudioRecordingRecoveryRepository: Sendable {
     func clear() async throws
 }
 
+public protocol AudioConsentAcknowledgementRepository: Sendable {
+    func acknowledgedAudioConsentVersion() async throws -> String?
+    func acknowledgeAudioConsent(version: String) async throws
+    func resetAudioConsentAcknowledgement() async throws
+}
+
 public struct StoredMediaFile: Equatable, Sendable {
     public var url: URL
     public var originalFilename: String
@@ -83,6 +89,7 @@ public struct CaptureLibrarySnapshot: Codable, Equatable, Sendable {
     public var outputPacks: [OutputPack]
     public var generatedOutputs: [GeneratedOutput]
     public var audioRecovery: AudioRecordingRecoveryMetadata?
+    public var audioConsentAcknowledgedVersion: String?
 
     public init(
         sessions: [CaptureSession] = [],
@@ -92,7 +99,8 @@ public struct CaptureLibrarySnapshot: Codable, Equatable, Sendable {
         curatedNotes: [CuratedNote] = [],
         outputPacks: [OutputPack] = [],
         generatedOutputs: [GeneratedOutput] = [],
-        audioRecovery: AudioRecordingRecoveryMetadata? = nil
+        audioRecovery: AudioRecordingRecoveryMetadata? = nil,
+        audioConsentAcknowledgedVersion: String? = nil
     ) {
         self.sessions = sessions
         self.sources = sources
@@ -102,6 +110,7 @@ public struct CaptureLibrarySnapshot: Codable, Equatable, Sendable {
         self.outputPacks = outputPacks
         self.generatedOutputs = generatedOutputs
         self.audioRecovery = audioRecovery
+        self.audioConsentAcknowledgedVersion = audioConsentAcknowledgedVersion
     }
 }
 
@@ -114,6 +123,7 @@ public actor JSONLocalLibraryStore:
     OutputPackRepository,
     GeneratedOutputRepository,
     AudioRecordingRecoveryRepository,
+    AudioConsentAcknowledgementRepository,
     MediaFileStorage,
     LocalLibraryMaintenance
 {
@@ -298,6 +308,22 @@ public actor JSONLocalLibraryStore:
     public func clear() async throws {
         var snapshot = try await load()
         snapshot.audioRecovery = nil
+        try await save(snapshot)
+    }
+
+    public func acknowledgedAudioConsentVersion() async throws -> String? {
+        try await load().audioConsentAcknowledgedVersion
+    }
+
+    public func acknowledgeAudioConsent(version: String) async throws {
+        var snapshot = try await load()
+        snapshot.audioConsentAcknowledgedVersion = version
+        try await save(snapshot)
+    }
+
+    public func resetAudioConsentAcknowledgement() async throws {
+        var snapshot = try await load()
+        snapshot.audioConsentAcknowledgedVersion = nil
         try await save(snapshot)
     }
 
@@ -542,5 +568,25 @@ public actor InMemoryAudioRecordingRecoveryRepository: AudioRecordingRecoveryRep
 
     public func clear() async throws {
         metadata = nil
+    }
+}
+
+public actor InMemoryAudioConsentAcknowledgementRepository: AudioConsentAcknowledgementRepository {
+    private var version: String?
+
+    public init(version: String? = nil) {
+        self.version = version
+    }
+
+    public func acknowledgedAudioConsentVersion() async throws -> String? {
+        version
+    }
+
+    public func acknowledgeAudioConsent(version: String) async throws {
+        self.version = version
+    }
+
+    public func resetAudioConsentAcknowledgement() async throws {
+        version = nil
     }
 }

@@ -41,6 +41,11 @@ struct ContentView: View {
             .task {
                 await model.loadIfNeeded()
             }
+            .onChange(of: model.showingAudioRecorder) { _, isShowing in
+                if isShowing {
+                    audioModel.prepareForNewCapture()
+                }
+            }
             .alert("CURA needs attention", isPresented: model.showingError) {
                 Button("OK", role: .cancel) {}
             } message: {

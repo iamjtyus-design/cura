@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 2A reliable local audio capture is implemented and verified locally. Phase 2B has not started.
+Phase 2A reliable local audio capture is implemented and verified through the Phase 2A.2 physical-device polish pass. Phase 2B has not started.
 
 ## Completed
 
@@ -70,6 +70,11 @@ Phase 2A reliable local audio capture is implemented and verified locally. Phase
 62. Friendly audio recording presentation that keeps UUID filenames as secondary metadata only.
 63. Immediate folder refresh and assignment for newly created folders in setup and detail flows.
 64. Helper copy for Learn, Create, Work, Private, and Smart modes without adding cloud behavior.
+65. Phase 2A.2 new-capture reset that prevents stale saved-playback state from appearing before a recording exists.
+66. Versioned local acknowledgement for the audio recording education notice, including a test reset path.
+67. Create mode as the default for newly created audio sessions.
+68. Top-of-detail editable session title with the duplicate lower title control removed.
+69. Static Smart/Private current-build presentation that marks Smart enhancements unavailable until a later approved phase.
 
 ## Verification
 
@@ -77,11 +82,11 @@ Phase 2A reliable local audio capture is implemented and verified locally. Phase
 2. `xcodebuild -project Cura.xcodeproj -target CuraApp -sdk iphonesimulator build` passes.
 3. `xcodebuild -project Cura.xcodeproj -target CuraTests -sdk iphonesimulator build` passes.
 4. `xcodebuild -project Cura.xcodeproj -target CuraUITests -sdk iphonesimulator build` passes.
-5. `swift test` passes 27 tests.
+5. `swift test` passes 32 tests.
 6. `swift run CuraSmokeTests` passes.
 7. `sh scripts/secret_scan.sh` passes.
 8. `xcodebuild -project Cura.xcodeproj -scheme CuraApp -destination 'id=0001DB82-B759-4301-AB9C-F79DC34B9867' test` passes.
-9. Native scheme-level verification executed 27 unit tests and 2 UI tests with 0 failures.
+9. Native scheme-level verification executed 32 unit tests and 2 UI tests with 0 failures.
 10. Device Debug build for connected iPhone `00008150-001643EA0C3A401C` passes when the local development team is supplied outside committed source.
 11. `Cura.app` and embedded `CuraCore.framework` pass `codesign` verification.
 12. `otool -D` verifies embedded `CuraCore.framework` uses `@rpath/CuraCore.framework/CuraCore`.
@@ -98,6 +103,9 @@ Phase 2A reliable local audio capture is implemented and verified locally. Phase
 23. `codesign --verify --deep --strict --verbose=2` passed for the Phase 2A.1 device `Cura.app`.
 24. Device install and launch passed for `com.visionbuilt.cura`.
 25. Physical-device UI automation passed the Phase 2A mock audio flow, including recording duration advancement, playback progress advancement, and relaunch persistence.
+26. Phase 2A.2 device Debug build passed for connected iPhone `00008150-001643EA0C3A401C`.
+27. `xcrun devicectl device install app` installed the Phase 2A.2 build successfully.
+28. `xcrun devicectl device process launch --terminate-existing com.visionbuilt.cura` launched the Phase 2A.2 build successfully.
 
 ## Blocked
 
@@ -133,4 +141,4 @@ Phase 2A reliable local audio capture is implemented and verified locally. Phase
 
 ## Next Milestone
 
-Phase 2A.1 satisfies its physical-device audio reliability checks. The exact next recommended action is to approve Phase 2B scope before starting any transcription, cloud upload, AI generation, Supabase, authentication, RevenueCat, or other remote-service work.
+Phase 2A.2 satisfies the final physical-device audio polish checks available in this environment. The exact next recommended action is to approve Phase 2B scope before starting any transcription, cloud upload, AI generation, Supabase, authentication, RevenueCat, or other remote-service work.

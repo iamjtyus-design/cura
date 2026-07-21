@@ -71,6 +71,62 @@ final class AudioRecordingTests: XCTestCase {
         XCTAssertEqual(model.state, .completed)
         XCTAssertEqual(sources.first?.sourceType, .liveAudio)
         XCTAssertEqual(sources.first?.mimeType, "audio/mp4")
+        XCTAssertEqual(session.mode, .create)
+    }
+
+    func testNewRecordingDoesNotAttemptPlaybackWithoutSavedFile() async {
+        let model = AudioRecordingViewModel(container: .test)
+
+        model.prepareForNewCapture()
+        await model.recordTapped()
+
+        XCTAssertTrue(model.errorMessage.isEmpty)
+        XCTAssertTrue(model.playbackUnavailableMessage.isEmpty)
+        XCTAssertEqual(model.playbackDuration, 0)
+        XCTAssertEqual(model.playbackPosition, 0)
+    }
+
+    func testMissingPlaybackFileUsesInlineUnavailableState() async {
+        let model = AudioRecordingViewModel(container: .test)
+        let missingURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension("m4a")
+
+        await model.loadPlayback(url: missingURL)
+
+        XCTAssertTrue(model.errorMessage.isEmpty)
+        XCTAssertTrue(model.playbackUnavailableMessage.contains("no longer available"))
+        XCTAssertEqual(model.playbackDuration, 0)
+    }
+
+    func testConsentNoticeFirstDisplayAndSubsequentSuppression() async {
+        let container = DependencyContainer.test
+        let model = AudioRecordingViewModel(container: container)
+
+        await model.recordTapped()
+        XCTAssertTrue(model.showConsentNotice)
+
+        await model.acceptConsentAndPrepare()
+        XCTAssertFalse(model.showConsentNotice)
+        XCTAssertEqual(model.state, .ready)
+
+        model.prepareForNewCapture()
+        await model.recordTapped()
+
+        XCTAssertFalse(model.showConsentNotice)
+        XCTAssertEqual(model.state, .ready)
+    }
+
+    func testConsentResetPathShowsNoticeAgain() async {
+        let model = AudioRecordingViewModel(container: .test)
+
+        await model.recordTapped()
+        await model.acceptConsentAndPrepare()
+        await model.resetAudioConsentForTesting()
+        model.prepareForNewCapture()
+        await model.recordTapped()
+
+        XCTAssertTrue(model.showConsentNotice)
     }
 
     func testPermissionDenialFailsClearly() async {

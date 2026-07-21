@@ -334,3 +334,31 @@
 3. Unprocessed saved audio sessions no longer show mock processing stages.
 4. Folder creation refreshes choices immediately and can assign the created folder to an existing session.
 5. Learn/Create/Work and Private/Smart helper text clarifies intent without implying current Smart-mode cloud upload.
+
+## D-029: Phase 2A.2 audio consent acknowledgement
+
+**Date:** 2026-07-20
+
+**Decision:** Store the audio recording education notice acknowledgement locally as a version string in the JSON library snapshot.
+
+**Reason:** The notice should appear once per installation unless the consent text materially changes, while automated tests still need a reset path.
+
+**Consequences:**
+
+1. The native microphone permission flow remains unchanged.
+2. Consent can be re-shown by changing the acknowledgement version or by using the test reset path.
+3. No server, analytics, authentication, or cloud state is introduced.
+
+## D-030: Phase 2A.2 current Smart/Private presentation
+
+**Date:** 2026-07-20
+
+**Decision:** Keep the stored processing-mode model intact but present Private/Smart as a static current-build explanation until the modes differ in an approved later phase.
+
+**Reason:** Smart should not imply current cloud upload or enhanced remote processing, and Phase 2A.2 cannot begin cloud, AI, or Phase 2B work.
+
+**Consequences:**
+
+1. Existing persisted sessions remain compatible with the `processingMode` field.
+2. Users see that current processing remains local/mock in this build.
+3. Smart enhancements are clearly marked unavailable until a later approved phase.

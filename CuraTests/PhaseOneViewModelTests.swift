@@ -65,6 +65,30 @@ final class PhaseOneViewModelTests: XCTestCase {
         XCTAssertEqual(relaunched.sessions.first?.folderID, folder.id)
     }
 
+    func testFoldersPersistAcrossOrdinaryRelaunch() async throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("cura-folder-persistence")
+            .appendingPathComponent(UUID().uuidString)
+        let container = DependencyContainer.makeLocalJSON(
+            configuration: .development,
+            rootDirectory: root,
+            audioRecorder: MockAudioRecordingProvider(),
+            audioPlayback: MockAudioPlaybackProvider()
+        )
+        let model = PhaseOneViewModel(container: container, arguments: [])
+        await model.loadIfNeeded()
+        model.newFolderName = "Site Notes"
+        let createdFolder = await model.addFolder()
+        let folder = try XCTUnwrap(createdFolder)
+
+        let relaunched = PhaseOneViewModel(container: container, arguments: [])
+        await relaunched.loadIfNeeded()
+
+        XCTAssertEqual(relaunched.folders.first?.id, folder.id)
+        XCTAssertEqual(relaunched.folders.first?.name, "Site Notes")
+        try await container.libraryMaintenance?.reset()
+    }
+
     func testProcessingSuccessCreatesCuratedNoteAndCreatorPackOutput() async throws {
         let model = PhaseOneViewModel(container: .test, arguments: [])
         await model.loadIfNeeded()

@@ -23,6 +23,12 @@ public struct AudioPlaybackView: View {
             Text("\(formatDuration(displayedPlaybackPosition)) / \(formatDuration(totalDuration))")
                 .font(.system(.body, design: .monospaced))
                 .foregroundStyle(.secondary)
+            if !recordingModel.playbackUnavailableMessage.isEmpty {
+                Text(recordingModel.playbackUnavailableMessage)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .accessibilityIdentifier("playbackUnavailableMessage")
+            }
             Slider(
                 value: Binding(
                     get: { displayedPlaybackPosition },
@@ -39,6 +45,7 @@ public struct AudioPlaybackView: View {
             .accessibilityLabel("Audio position")
             .accessibilityValue("\(formatDuration(displayedPlaybackPosition)) of \(formatDuration(totalDuration))")
             .accessibilityIdentifier("playbackProgress")
+            .disabled(!recordingModel.playbackUnavailableMessage.isEmpty)
             HStack {
                 Button {
                     Task {
@@ -53,6 +60,7 @@ public struct AudioPlaybackView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .accessibilityLabel(recordingModel.isPlaybackPlaying ? "Pause Recording Playback" : "Play Recording")
+                .disabled(!recordingModel.playbackUnavailableMessage.isEmpty)
             }
         }
         .padding()
