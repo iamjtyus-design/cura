@@ -17,11 +17,8 @@
 		100000000000000000000108 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000008 /* AppCoordinator.swift */; };
 		100000000000000000000109 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000009 /* ContentView.swift */; };
 		100000000000000000000110 /* CuraApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000010 /* CuraApp.swift */; };
-		100000000000000000000111 /* CuraCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 100000000000000000000020 /* CuraCore.framework */; };
-		100000000000000000000112 /* CuraCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 100000000000000000000020 /* CuraCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		100000000000000000000113 /* DomainModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000013 /* DomainModelTests.swift */; };
 		100000000000000000000114 /* DependencyContainerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000014 /* DependencyContainerTests.swift */; };
-		100000000000000000000115 /* CuraCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 100000000000000000000020 /* CuraCore.framework */; };
 		100000000000000000000116 /* CuraUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000015 /* CuraUITests.swift */; };
 		200000000000000000000101 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000001 /* HomeView.swift */; };
 		200000000000000000000102 /* SessionSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000002 /* SessionSetupView.swift */; };
@@ -39,17 +36,20 @@
 		300000000000000000000104 /* AudioPlaybackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000004 /* AudioPlaybackView.swift */; };
 		300000000000000000000105 /* AudioRecordingProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000005 /* AudioRecordingProviders.swift */; };
 		300000000000000000000106 /* AudioRecordingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000006 /* AudioRecordingTests.swift */; };
+		400000000000000000000111 /* CuraCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 400000000000000000000020 /* CuraCore.framework */; };
+		400000000000000000000112 /* CuraCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 400000000000000000000020 /* CuraCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		400000000000000000000115 /* CuraCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 400000000000000000000020 /* CuraCore.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		100000000000000000000201 /* PBXContainerItemProxy */ = {
+		400000000000000000000201 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 100000000000000000000300 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 100000000000000000000401;
 			remoteInfo = CuraCore;
 		};
-		100000000000000000000202 /* PBXContainerItemProxy */ = {
+		400000000000000000000202 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 100000000000000000000300 /* Project object */;
 			proxyType = 1;
@@ -65,7 +65,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				100000000000000000000112 /* CuraCore.framework in Embed Frameworks */,
+				400000000000000000000112 /* CuraCore.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -89,7 +89,6 @@
 		100000000000000000000014 /* DependencyContainerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyContainerTests.swift; sourceTree = "<group>"; };
 		100000000000000000000015 /* CuraUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CuraUITests.swift; sourceTree = "<group>"; };
 		100000000000000000000016 /* Production.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Production.xcconfig; sourceTree = "<group>"; };
-		100000000000000000000020 /* CuraCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CuraCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		100000000000000000000021 /* Cura.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cura.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		100000000000000000000022 /* CuraTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CuraTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		100000000000000000000023 /* CuraUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CuraUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -109,6 +108,7 @@
 		300000000000000000000004 /* AudioPlaybackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlaybackView.swift; sourceTree = "<group>"; };
 		300000000000000000000005 /* AudioRecordingProviders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecordingProviders.swift; sourceTree = "<group>"; };
 		300000000000000000000006 /* AudioRecordingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecordingTests.swift; sourceTree = "<group>"; };
+		400000000000000000000020 /* CuraCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CuraCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,7 +123,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				100000000000000000000111 /* CuraCore.framework in Frameworks */,
+				400000000000000000000111 /* CuraCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,7 +131,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				100000000000000000000115 /* CuraCore.framework in Frameworks */,
+				400000000000000000000115 /* CuraCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -171,7 +171,7 @@
 		100000000000000000000703 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				100000000000000000000020 /* CuraCore.framework */,
+				400000000000000000000020 /* CuraCore.framework */,
 				100000000000000000000021 /* Cura.app */,
 				100000000000000000000022 /* CuraTests.xctest */,
 				100000000000000000000023 /* CuraUITests.xctest */,
@@ -371,7 +371,7 @@
 			);
 			name = CuraCore;
 			productName = CuraCore;
-			productReference = 100000000000000000000020 /* CuraCore.framework */;
+			productReference = 400000000000000000000020 /* CuraCore.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		100000000000000000000402 /* CuraApp */ = {
@@ -385,7 +385,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				100000000000000000000901 /* PBXTargetDependency */,
+				400000000000000000000901 /* PBXTargetDependency */,
 			);
 			name = CuraApp;
 			productName = Cura;
@@ -402,7 +402,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				100000000000000000000902 /* PBXTargetDependency */,
+				400000000000000000000902 /* PBXTargetDependency */,
 			);
 			name = CuraTests;
 			productName = CuraTests;
@@ -419,7 +419,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				100000000000000000000903 /* PBXTargetDependency */,
+				400000000000000000000903 /* PBXTargetDependency */,
 			);
 			name = CuraUITests;
 			productName = CuraUITests;
@@ -535,20 +535,20 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		100000000000000000000901 /* PBXTargetDependency */ = {
+		400000000000000000000901 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 100000000000000000000401 /* CuraCore */;
-			targetProxy = 100000000000000000000201 /* PBXContainerItemProxy */;
+			targetProxy = 400000000000000000000201 /* PBXContainerItemProxy */;
 		};
-		100000000000000000000902 /* PBXTargetDependency */ = {
+		400000000000000000000902 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 100000000000000000000401 /* CuraCore */;
-			targetProxy = 100000000000000000000201 /* PBXContainerItemProxy */;
+			targetProxy = 400000000000000000000201 /* PBXContainerItemProxy */;
 		};
-		100000000000000000000903 /* PBXTargetDependency */ = {
+		400000000000000000000903 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 100000000000000000000402 /* CuraApp */;
-			targetProxy = 100000000000000000000202 /* PBXContainerItemProxy */;
+			targetProxy = 400000000000000000000202 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

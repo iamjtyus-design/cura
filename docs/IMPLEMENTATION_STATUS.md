@@ -81,19 +81,27 @@ Phase 2A reliable local audio capture is implemented and verified locally. Phase
 12. `otool -D` verifies embedded `CuraCore.framework` uses `@rpath/CuraCore.framework/CuraCore`.
 13. `otool -L` verifies `Cura.app/Cura` links `CuraCore` through `@rpath`.
 14. Clean device build and device install pass for connected iPhone `00008150-001643EA0C3A401C`.
+15. `CuraCore.framework` project references were refreshed to a single `BUILT_PRODUCTS_DIR` file reference used by the app link phase, app embed phase, core product reference, and test link phase.
+16. `CuraApp` explicitly depends on the `CuraCore` target.
+17. Clean device build logs show `CuraCore.framework` is embedded from the current device build products directory.
+18. Current device `otool -L` output for `Cura.app/Cura` contains `@rpath/CuraCore.framework/CuraCore` and not `/Library/Frameworks/CuraCore.framework/CuraCore`.
+19. Current device `otool -D` output for embedded `CuraCore.framework/CuraCore` is `@rpath/CuraCore.framework/CuraCore`.
+20. `xcrun devicectl device install app` succeeds for `com.visionbuilt.cura`.
+21. Simulator scheme-level verification still passes with 19 unit tests and 2 UI tests.
 
 ## Blocked
 
-1. Direct `devicectl` launch confirmation did not return a normal launch-completion record in this session, although it no longer reports the prior dyld framework-load error.
-2. Physical-device UI-test launch is blocked by the test runner identifier `com.visionbuilt.cura.uitests.xctrunner` not being found on device.
-3. Apple Developer account details for committed release/distribution signing.
-4. Supabase project.
-5. RevenueCat project.
-6. Production AI provider accounts.
-7. Final domain and support email.
-8. Trademark clearance.
-9. Legal review.
-10. Final pricing after cost tests.
+1. Physical-device launch is blocked by iOS security trust for the development signing profile/certificate: `devicectl` reports `RequestDenied` because the profile has not been explicitly trusted by the user. This is not the prior `CuraCore` dyld load error.
+2. Host `codesign --verify` reports `CSSMERR_TP_NOT_TRUSTED` for the device build because the development signing authority is not trusted on this Mac, although embedded signatures are present.
+3. Physical-device UI-test launch is blocked by the test runner identifier `com.visionbuilt.cura.uitests.xctrunner` not being found on device.
+4. Apple Developer account details for committed release/distribution signing.
+5. Supabase project.
+6. RevenueCat project.
+7. Production AI provider accounts.
+8. Final domain and support email.
+9. Trademark clearance.
+10. Legal review.
+11. Final pricing after cost tests.
 
 ## Deferred
 
@@ -118,4 +126,4 @@ Phase 2A reliable local audio capture is implemented and verified locally. Phase
 
 ## Next Milestone
 
-Phase 2A satisfies its local audio capture exit criteria. Device signing and runtime framework linking are fixed at the build artifact level; final manual foreground launch confirmation on the physical iPhone remains the next immediate check before Phase 2B approval.
+Phase 2A satisfies its local audio capture exit criteria. Runtime framework linking is fixed at the project graph and build artifact level; final physical-device launch now requires trusting the development signing profile/certificate on the iPhone before Phase 2B approval.

@@ -286,3 +286,19 @@
 2. `CuraApp` now includes `@executable_path/Frameworks` and `@loader_path/Frameworks` in `LD_RUNPATH_SEARCH_PATHS`.
 3. The app continues to embed and sign `CuraCore.framework`.
 4. Product behavior is unchanged.
+
+## D-026: CuraCore target product reference refresh
+
+**Date:** 2026-07-20
+
+**Decision:** Refresh the `CuraCore.framework` product file reference, app link build file, app embed build file, test link build file, target dependencies, and container item proxies so all app references resolve through the current `CuraCore` target product in `BUILT_PRODUCTS_DIR`.
+
+**Reason:** Xcode displayed the embedded framework with a build-products path, and the physical device still reported the old runtime behavior after Derived Data was deleted. The committed project did not contain a literal stale `build/Debug-iphoneos` framework path, so the safest non-product change was to rebuild the target-product graph with fresh references and preserve the target dependency.
+
+**Consequences:**
+
+1. `CuraApp` has exactly one `CuraCore.framework` in Link Binary With Libraries and one in Embed Frameworks.
+2. The embed step preserves `CodeSignOnCopy`.
+3. `CuraApp` explicitly depends on the `CuraCore` target.
+4. `CuraCore.framework` remains the local framework product and is not converted to a package or copied from a path-based reference.
+5. Product behavior is unchanged.

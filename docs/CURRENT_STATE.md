@@ -94,3 +94,20 @@ Runtime-linking verification on 2026-07-20:
 7. `xcrun devicectl device install app` installed `com.visionbuilt.cura` successfully on the connected iPhone.
 8. Direct `devicectl` launch probes no longer report the prior dyld framework-load error, but the tool did not return a normal launch-completion record in this session.
 9. A focused physical-device UI-test attempt was blocked by the test runner identifier `com.visionbuilt.cura.uitests.xctrunner` not being found; this was not a Cura app dyld failure.
+
+Target-reference verification on 2026-07-20:
+
+1. `Cura.xcodeproj/project.pbxproj` was audited for every `CuraCore.framework`, `build/Debug-iphoneos`, `PBXFileReference`, `PBXBuildFile`, `PBXTargetDependency`, and `PBXContainerItemProxy` reference.
+2. No committed literal `build/Debug-iphoneos` framework path remained, but the `CuraCore.framework` build-file, product-file, target-dependency, and proxy identifiers were refreshed so Xcode uses the current target product reference.
+3. `CuraCore.framework` now has one built-products `PBXFileReference` with `sourceTree = BUILT_PRODUCTS_DIR`.
+4. `CuraApp` has exactly one `CuraCore.framework` entry in Link Binary With Libraries and exactly one in Embed Frameworks.
+5. The embed build file preserves `CodeSignOnCopy` and `RemoveHeadersOnCopy`.
+6. `CuraApp` has an explicit target dependency on `CuraCore`.
+7. A clean physical-device build from `/tmp/cura-device-deriveddata` succeeded for connected iPhone `00008150-001643EA0C3A401C`.
+8. The build log shows `CuraCore.framework` copied from `/tmp/cura-device-deriveddata/Build/Products/Debug-iphoneos/CuraCore.framework` into `Cura.app/Frameworks`.
+9. `otool -L` on the rebuilt `Cura.app/Cura` reports `@rpath/CuraCore.framework/CuraCore` and does not report `/Library/Frameworks/CuraCore.framework/CuraCore`.
+10. `otool -D` on the embedded `Cura.app/Frameworks/CuraCore.framework/CuraCore` reports `@rpath/CuraCore.framework/CuraCore`.
+11. `xcrun devicectl device install app` installed `com.visionbuilt.cura` successfully on the connected iPhone.
+12. Physical-device launch is now blocked by iOS security trust for the development signing profile/certificate, reported as `RequestDenied` with "invalid code signature, inadequate entitlements or its profile has not been explicitly trusted by the user"; no dyld `CuraCore` load error was reported.
+13. Host `codesign --verify` reports `CSSMERR_TP_NOT_TRUSTED`, while `codesign -dv` confirms embedded signatures and team identifiers are present on both `Cura.app` and `CuraCore.framework`.
+14. Simulator scheme tests passed again on iPhone 17 Pro, iOS 26.5, UDID `0001DB82-B759-4301-AB9C-F79DC34B9867`, with 19 unit tests and 2 UI tests.
