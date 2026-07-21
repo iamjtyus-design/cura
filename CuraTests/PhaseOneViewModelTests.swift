@@ -39,6 +39,32 @@ final class PhaseOneViewModelTests: XCTestCase {
         XCTAssertEqual(model.selectedSession?.folderID, model.folders.first?.id)
     }
 
+    func testFolderCreationRefreshesAndCanAssignExistingSession() async throws {
+        let container = DependencyContainer.test
+        let session = CaptureSession(title: "Audio Recording", mode: .learn, status: .ready)
+        try await container.sessions.save(session)
+        let model = PhaseOneViewModel(container: container, arguments: [])
+        await model.loadIfNeeded()
+
+        model.newFolderName = "Field Notes"
+        let createdFolder = await model.addFolder()
+        let folder = try XCTUnwrap(createdFolder)
+        await model.saveSessionMetadata(
+            session,
+            title: session.title,
+            mode: session.mode,
+            folderID: folder.id,
+            processingMode: session.processingMode
+        )
+
+        XCTAssertEqual(model.folders.first?.name, "Field Notes")
+        XCTAssertEqual(model.selectedSession?.folderID, folder.id)
+
+        let relaunched = PhaseOneViewModel(container: container, arguments: [])
+        await relaunched.loadIfNeeded()
+        XCTAssertEqual(relaunched.sessions.first?.folderID, folder.id)
+    }
+
     func testProcessingSuccessCreatesCuratedNoteAndCreatorPackOutput() async throws {
         let model = PhaseOneViewModel(container: .test, arguments: [])
         await model.loadIfNeeded()
@@ -74,6 +100,32 @@ final class PhaseOneViewModelTests: XCTestCase {
         await model.copyAndOpenInstagram("Caption")
 
         XCTAssertEqual(model.shareItem?.text, "Caption")
+    }
+
+    func testProcessingStageLabelsAreSourceAware() {
+        XCTAssertEqual(PhaseOneProcessingStage.readingVideo.title(sourceType: .liveAudio), "Reading Audio")
+        XCTAssertEqual(PhaseOneProcessingStage.readingVideo.title(sourceType: .uploadedAudio), "Reading Audio")
+        XCTAssertEqual(PhaseOneProcessingStage.readingVideo.title(sourceType: .uploadedVideo), "Reading Video")
+    }
+
+    func testReadyAudioSessionDoesNotShowProcessingStages() async throws {
+        let container = DependencyContainer.test
+        let session = CaptureSession(title: "Audio Recording", mode: .learn, status: .ready)
+        let source = CaptureSource(
+            sessionID: session.id,
+            sourceType: .liveAudio,
+            originalFilename: "recording.m4a",
+            mimeType: "audio/mp4",
+            duration: 4
+        )
+        try await container.sessions.save(session)
+        try await container.sources.save(source)
+
+        let model = PhaseOneViewModel(container: container, arguments: [])
+        await model.loadIfNeeded()
+
+        XCTAssertFalse(model.shouldShowProcessing(for: session))
+        XCTAssertEqual(model.primarySourceType(for: session.id), .liveAudio)
     }
 
     private func makeVideoFile() throws -> URL {

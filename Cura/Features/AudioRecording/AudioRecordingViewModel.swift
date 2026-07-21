@@ -8,6 +8,7 @@ public final class AudioRecordingViewModel: ObservableObject {
     @Published public private(set) var duration: TimeInterval = 0
     @Published public private(set) var playbackDuration: TimeInterval = 0
     @Published public private(set) var playbackPosition: TimeInterval = 0
+    @Published public private(set) var isPlaybackPlaying = false
     @Published public private(set) var recoveredMetadata: AudioRecordingRecoveryMetadata?
     @Published public private(set) var savedSession: CaptureSession?
     @Published public private(set) var savedSource: CaptureSource?
@@ -20,6 +21,8 @@ public final class AudioRecordingViewModel: ObservableObject {
     private var activeSourceID: UUID?
     private var activeFileURL: URL?
     private var recordingStartDate: Date?
+    private var recordingTimerTask: Task<Void, Never>?
+    private var playbackTimerTask: Task<Void, Never>?
 
     public var showingError: Binding<Bool> {
         Binding(
@@ -83,11 +86,14 @@ public final class AudioRecordingViewModel: ObservableObject {
             recordingStartDate = recordingStartDate ?? Date()
             try await container.audioRecorder.startRecording(to: url, configuration: AudioRecordingConfiguration())
             transition(to: .recording)
+            startRecordingTimer()
             await persistRecovery(reason: nil)
         } catch CocoaError.fileWriteOutOfSpace {
+            stopRecordingTimer()
             transition(to: .failed)
             errorMessage = "There is not enough storage to start recording."
         } catch {
+            stopRecordingTimer()
             transition(to: .failed)
             errorMessage = "Recording could not start."
         }
@@ -98,9 +104,11 @@ public final class AudioRecordingViewModel: ObservableObject {
         do {
             try await container.audioRecorder.pauseRecording()
             duration = await container.audioRecorder.currentDuration()
+            stopRecordingTimer()
             transition(to: .paused)
             await persistRecovery(reason: nil)
         } catch {
+            stopRecordingTimer()
             transition(to: .failed)
             errorMessage = "Recording could not pause."
         }
@@ -111,8 +119,10 @@ public final class AudioRecordingViewModel: ObservableObject {
         do {
             try await container.audioRecorder.resumeRecording()
             transition(to: .recording)
+            startRecordingTimer()
             await persistRecovery(reason: nil)
         } catch {
+            stopRecordingTimer()
             transition(to: .failed)
             errorMessage = "Recording could not resume."
         }
@@ -127,6 +137,7 @@ public final class AudioRecordingViewModel: ObservableObject {
 
     public func stopAndSave() async {
         guard let sessionID = activeSessionID, let sourceID = activeSourceID, let fileURL = activeFileURL else { return }
+        stopRecordingTimer()
         transition(to: .stopping)
         do {
             let finalDuration = try await container.audioRecorder.stopRecording()
@@ -151,6 +162,7 @@ public final class AudioRecordingViewModel: ObservableObject {
             savedSource = source
             transition(to: .completed)
         } catch {
+            stopRecordingTimer()
             transition(to: .failed)
             await persistRecovery(reason: .saveFailure)
             errorMessage = "Recording could not be saved."
@@ -164,8 +176,10 @@ public final class AudioRecordingViewModel: ObservableObject {
                 try await container.mediaStorage.deleteMedia(at: activeFileURL)
             }
             try await container.audioRecovery.clear()
+            stopRecordingTimer()
             resetLocalState()
         } catch {
+            stopRecordingTimer()
             transition(to: .failed)
             errorMessage = "Recording cancellation failed."
         }
@@ -174,6 +188,7 @@ public final class AudioRecordingViewModel: ObservableObject {
     public func handleInterruption(_ reason: AudioRecordingInterruptionReason) async {
         guard state == .recording || state == .paused else { return }
         duration = await container.audioRecorder.currentDuration()
+        stopRecordingTimer()
         transition(to: .interrupted)
         await persistRecovery(reason: reason)
     }
@@ -187,23 +202,37 @@ public final class AudioRecordingViewModel: ObservableObject {
         do {
             playbackDuration = try await container.audioPlayback.load(url: url)
             playbackPosition = await container.audioPlayback.currentTime()
+            isPlaybackPlaying = false
         } catch {
             errorMessage = "Recording playback could not be loaded."
         }
     }
 
     public func play() async {
-        try? await container.audioPlayback.play()
+        do {
+            try await container.audioPlayback.play()
+            isPlaybackPlaying = await container.audioPlayback.isPlaying()
+            startPlaybackTimer()
+        } catch {
+            isPlaybackPlaying = false
+            errorMessage = "Recording playback could not start."
+        }
     }
 
     public func pausePlayback() async {
         await container.audioPlayback.pause()
         playbackPosition = await container.audioPlayback.currentTime()
+        isPlaybackPlaying = false
+        stopPlaybackTimer()
     }
 
     public func seek(to time: TimeInterval) async {
         await container.audioPlayback.seek(to: time)
         playbackPosition = await container.audioPlayback.currentTime()
+    }
+
+    public func handlePlaybackInterruption() async {
+        await pausePlayback()
     }
 
     private func persistRecovery(reason: AudioRecordingInterruptionReason?) async {
@@ -236,6 +265,8 @@ public final class AudioRecordingViewModel: ObservableObject {
     }
 
     private func resetLocalState() {
+        stopRecordingTimer()
+        stopPlaybackTimer()
         activeSessionID = nil
         activeSourceID = nil
         activeFileURL = nil
@@ -245,7 +276,53 @@ public final class AudioRecordingViewModel: ObservableObject {
         recoveredMetadata = nil
         savedSession = nil
         savedSource = nil
+        playbackDuration = 0
+        playbackPosition = 0
+        isPlaybackPlaying = false
         machine = AudioRecordingStateMachine()
         state = .idle
+    }
+
+    private func startRecordingTimer() {
+        stopRecordingTimer()
+        recordingTimerTask = Task { [weak self] in
+            while !Task.isCancelled {
+                guard let self else { return }
+                self.duration = await self.container.audioRecorder.currentDuration()
+                try? await Task.sleep(nanoseconds: 200_000_000)
+            }
+        }
+    }
+
+    private func stopRecordingTimer() {
+        recordingTimerTask?.cancel()
+        recordingTimerTask = nil
+    }
+
+    private func startPlaybackTimer() {
+        stopPlaybackTimer()
+        playbackTimerTask = Task { [weak self] in
+            while !Task.isCancelled {
+                guard let self else { return }
+                let position = await self.container.audioPlayback.currentTime()
+                let playing = await self.container.audioPlayback.isPlaying()
+                self.playbackPosition = position
+                self.isPlaybackPlaying = playing
+                if !playing {
+                    if self.playbackDuration > 0, position >= self.playbackDuration - 0.05 {
+                        await self.container.audioPlayback.seek(to: 0)
+                        self.playbackPosition = 0
+                    }
+                    self.stopPlaybackTimer()
+                    return
+                }
+                try? await Task.sleep(nanoseconds: 200_000_000)
+            }
+        }
+    }
+
+    private func stopPlaybackTimer() {
+        playbackTimerTask?.cancel()
+        playbackTimerTask = nil
     }
 }

@@ -302,3 +302,35 @@
 3. `CuraApp` explicitly depends on the `CuraCore` target.
 4. `CuraCore.framework` remains the local framework product and is not converted to a package or copied from a path-based reference.
 5. Product behavior is unchanged.
+
+## D-027: Phase 2A.1 observable audio time
+
+**Date:** 2026-07-20
+
+**Decision:** Drive recording and playback time display from cancellable `AudioRecordingViewModel` timer tasks that poll injected audio providers every 0.2 seconds.
+
+**Reason:** Physical-device testing showed that real recording and playback continued while the visible recording timer and playback progress stayed stale. The view model should publish observable state while providers remain responsible for AVFoundation details.
+
+**Consequences:**
+
+1. Recording duration updates several times per second during active recording.
+2. Accumulated duration is preserved across pause/resume.
+3. Playback position, total duration, playing state, seeking, and completion reset are testable through provider protocols.
+4. Timers are stopped on pause, stop, cancel, interruption, failure, completion, and reset.
+5. No cloud upload, transcription, AI generation, Supabase, RevenueCat, authentication, or Phase 2B work is introduced.
+
+## D-028: Phase 2A.1 source-aware session presentation
+
+**Date:** 2026-07-20
+
+**Decision:** Keep saved audio sessions friendly and source-aware by labeling recordings as "Audio Recording", hiding processing stages until processing starts, and changing the read stage copy based on source type.
+
+**Reason:** Physical-device testing showed audio sessions were exposing raw UUID filenames, unused mock processing stages, and video-specific processing copy even when the source was audio.
+
+**Consequences:**
+
+1. UUID filenames remain available only as secondary file metadata.
+2. Audio processing copy says "Reading Audio"; video processing copy says "Reading Video".
+3. Unprocessed saved audio sessions no longer show mock processing stages.
+4. Folder creation refreshes choices immediately and can assign the created folder to an existing session.
+5. Learn/Create/Work and Private/Smart helper text clarifies intent without implying current Smart-mode cloud upload.

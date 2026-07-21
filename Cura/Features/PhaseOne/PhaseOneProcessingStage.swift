@@ -9,11 +9,20 @@ public enum PhaseOneProcessingStage: String, CaseIterable, Identifiable, Sendabl
     public var id: String { rawValue }
 
     public var title: String {
+        title(sourceType: nil)
+    }
+
+    public func title(sourceType: CaptureSourceType?) -> String {
         switch self {
         case .preparing:
             return "Preparing"
         case .readingVideo:
-            return "Reading Video"
+            switch sourceType {
+            case .liveAudio, .uploadedAudio:
+                return "Reading Audio"
+            default:
+                return "Reading Video"
+            }
         case .buildingCuratedNote:
             return "Building Curated Note"
         case .creatingCreatorPack:
@@ -29,6 +38,17 @@ public enum PhaseOneSurface {
 public extension CaptureMode {
     var displayName: String {
         rawValue.capitalized
+    }
+
+    var guidance: String {
+        switch self {
+        case .learn:
+            return "Notes, concepts, study materials."
+        case .create:
+            return "Content ideas and creator outputs."
+        case .work:
+            return "Summaries, tasks, reports, and professional outputs."
+        }
     }
 }
 
@@ -52,6 +72,17 @@ public extension ProcessingMode {
             return "Smart"
         case .futureSync:
             return "Future Sync"
+        }
+    }
+
+    var guidance: String {
+        switch self {
+        case .private:
+            return "Keeps processing local whenever the selected capability supports it."
+        case .smart:
+            return "May later use temporary protected cloud processing for enhanced results."
+        case .futureSync:
+            return "Reserved for future synchronized workflows."
         }
     }
 }

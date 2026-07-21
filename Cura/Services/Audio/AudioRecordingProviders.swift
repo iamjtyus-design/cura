@@ -32,6 +32,7 @@ public protocol AudioPlaybackProviding: Sendable {
     func pause() async
     func seek(to time: TimeInterval) async
     func currentTime() async -> TimeInterval
+    func isPlaying() async -> Bool
 }
 
 #if os(iOS) && canImport(AVFoundation)
@@ -96,6 +97,7 @@ public actor AVFoundationAudioRecordingProvider: AudioRecordingProviding {
         recorder?.stop()
         recorder = nil
         startedAt = nil
+        accumulatedDuration = duration
         try AVAudioSession.sharedInstance().setActive(false, options: [.notifyOthersOnDeactivation])
         return duration
     }
@@ -111,11 +113,11 @@ public actor AVFoundationAudioRecordingProvider: AudioRecordingProviding {
     }
 
     public func currentDuration() async -> TimeInterval {
-        if let recorder {
-            return recorder.currentTime
-        }
         if let startedAt {
             return accumulatedDuration + Date().timeIntervalSince(startedAt)
+        }
+        if let recorder {
+            return recorder.currentTime
         }
         return accumulatedDuration
     }
@@ -133,6 +135,8 @@ public actor AVFoundationAudioPlaybackProvider: AudioPlaybackProviding {
     }
 
     public func play() async throws {
+        try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+        try AVAudioSession.sharedInstance().setActive(true)
         player?.play()
     }
 
@@ -147,6 +151,10 @@ public actor AVFoundationAudioPlaybackProvider: AudioPlaybackProviding {
     public func currentTime() async -> TimeInterval {
         player?.currentTime ?? 0
     }
+
+    public func isPlaying() async -> Bool {
+        player?.isPlaying ?? false
+    }
 }
 #endif
 
@@ -156,6 +164,7 @@ public actor MockAudioRecordingProvider: AudioRecordingProviding {
     private var state: AudioRecordingState = .idle
     private var duration: TimeInterval = 0
     private var outputURL: URL?
+    private var startedAt: Date?
 
     public init(permission: AudioRecordingPermissionStatus = .granted, shouldFailStart: Bool = false) {
         self.permission = permission
@@ -178,58 +187,99 @@ public actor MockAudioRecordingProvider: AudioRecordingProviding {
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         try Data("mock m4a audio".utf8).write(to: url)
         state = .recording
-        duration = max(duration, 1)
+        duration = 0
+        startedAt = Date()
     }
 
     public func pauseRecording() async throws {
+        duration = await currentDuration()
         state = .paused
-        duration += 1
+        startedAt = nil
     }
 
     public func resumeRecording() async throws {
         state = .recording
-        duration += 1
+        startedAt = Date()
     }
 
     public func stopRecording() async throws -> TimeInterval {
         state = .completed
-        duration = max(duration, 3)
+        duration = max(await currentDuration(), 0.2)
+        startedAt = nil
         return duration
     }
 
     public func cancelRecording() async throws {
         state = .idle
+        duration = 0
+        startedAt = nil
         if let outputURL, FileManager.default.fileExists(atPath: outputURL.path) {
             try FileManager.default.removeItem(at: outputURL)
         }
     }
 
     public func currentDuration() async -> TimeInterval {
-        duration
+        if let startedAt {
+            return duration + Date().timeIntervalSince(startedAt)
+        }
+        return duration
     }
 }
 
 public actor MockAudioPlaybackProvider: AudioPlaybackProviding {
     private var duration: TimeInterval
     private var position: TimeInterval = 0
+    private var startedAt: Date?
+    private var isPlaybackActive = false
 
     public init(duration: TimeInterval = 3) {
         self.duration = duration
     }
 
     public func load(url: URL) async throws -> TimeInterval {
-        duration
+        position = 0
+        startedAt = nil
+        isPlaybackActive = false
+        return duration
     }
 
-    public func play() async throws {}
+    public func play() async throws {
+        guard position < duration else {
+            position = 0
+            return
+        }
+        startedAt = Date()
+        isPlaybackActive = true
+    }
 
-    public func pause() async {}
+    public func pause() async {
+        position = await currentTime()
+        startedAt = nil
+        isPlaybackActive = false
+    }
 
     public func seek(to time: TimeInterval) async {
         position = min(max(time, 0), duration)
+        if isPlaybackActive {
+            startedAt = Date()
+        }
     }
 
     public func currentTime() async -> TimeInterval {
-        position
+        guard isPlaybackActive, let startedAt else {
+            return position
+        }
+        let current = min(position + Date().timeIntervalSince(startedAt), duration)
+        if current >= duration {
+            position = duration
+            self.startedAt = nil
+            isPlaybackActive = false
+        }
+        return current
+    }
+
+    public func isPlaying() async -> Bool {
+        _ = await currentTime()
+        return isPlaybackActive
     }
 }

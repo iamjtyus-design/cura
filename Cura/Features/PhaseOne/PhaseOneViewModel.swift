@@ -66,12 +66,16 @@ public final class PhaseOneViewModel: ObservableObject {
         }
     }
 
-    public func addFolder() async {
+    @discardableResult
+    public func addFolder() async -> Folder? {
         let trimmed = newFolderName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
-        try? await container.folders.save(Folder(name: trimmed))
+        guard !trimmed.isEmpty else { return nil }
+        let folder = Folder(name: trimmed)
+        try? await container.folders.save(folder)
         newFolderName = ""
         await refreshPublishedState()
+        setupFolderID = folder.id
+        return folder
     }
 
     public func startProcessing() async {
@@ -156,8 +160,21 @@ public final class PhaseOneViewModel: ObservableObject {
         sourcesBySessionID[sessionID, default: []]
     }
 
+    public func primarySourceType(for sessionID: UUID) -> CaptureSourceType? {
+        sources(for: sessionID).first?.sourceType
+    }
+
     public func audioSource(for sessionID: UUID) -> CaptureSource? {
         sources(for: sessionID).first { $0.sourceType == .liveAudio || $0.sourceType == .uploadedAudio }
+    }
+
+    public func shouldShowProcessing(for session: CaptureSession) -> Bool {
+        session.status == .processing ||
+            session.status == .completed ||
+            activeStage != nil ||
+            !completedStages.isEmpty ||
+            note(for: session.id) != nil ||
+            instagramCaption(for: session.id) != nil
     }
 
     public func saveSessionMetadata(

@@ -1,9 +1,7 @@
 # Next Actions
 
-1. Trust the development signing profile/certificate on the physical iPhone, then launch the installed CURA Debug build and confirm it reaches the CURA home screen.
-2. After launch trust is resolved, review the Phase 2A local audio flow on the physical iPhone for real microphone behavior and audio-route interruptions.
-3. Decide whether to add a stable physical-device launch smoke check separate from UI-test runner installation.
-4. Approve Phase 2B scope before any transcription, cloud upload, AI generation, or remote service work begins.
-5. Keep live AI, Supabase, RevenueCat, authentication, and paid services deferred until their planned phases.
-6. Decide when release/distribution signing should be configured.
-7. Keep project-memory documents updated at the end of every build session.
+1. Approve Phase 2B scope before any transcription, cloud upload, AI generation, Supabase, authentication, RevenueCat, or remote-service work begins.
+2. Keep live AI, Supabase, RevenueCat, authentication, and paid services deferred until their planned phases.
+3. Decide when release/distribution signing should be configured.
+4. Decide whether physical-device UI automation should remain part of every local verification pass or be reserved for device-specific regressions.
+5. Keep project-memory documents updated at the end of every build session.

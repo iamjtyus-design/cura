@@ -64,6 +64,12 @@ Phase 2A reliable local audio capture is implemented and verified locally. Phase
 56. Audio recovery metadata persistence.
 57. Microphone usage description in app build settings.
 58. Audio unit tests and mock audio UI test.
+59. Phase 2A.1 observable recording timer backed by cancellable view-model polling and provider accumulated duration.
+60. Phase 2A.1 playback progress, current/total duration display, smooth deferred seeking, and completion reset.
+61. Source-aware processing labels and hidden processing stages for unprocessed saved audio sessions.
+62. Friendly audio recording presentation that keeps UUID filenames as secondary metadata only.
+63. Immediate folder refresh and assignment for newly created folders in setup and detail flows.
+64. Helper copy for Learn, Create, Work, Private, and Smart modes without adding cloud behavior.
 
 ## Verification
 
@@ -71,11 +77,11 @@ Phase 2A reliable local audio capture is implemented and verified locally. Phase
 2. `xcodebuild -project Cura.xcodeproj -target CuraApp -sdk iphonesimulator build` passes.
 3. `xcodebuild -project Cura.xcodeproj -target CuraTests -sdk iphonesimulator build` passes.
 4. `xcodebuild -project Cura.xcodeproj -target CuraUITests -sdk iphonesimulator build` passes.
-5. `swift test` passes 19 tests.
+5. `swift test` passes 27 tests.
 6. `swift run CuraSmokeTests` passes.
 7. `sh scripts/secret_scan.sh` passes.
 8. `xcodebuild -project Cura.xcodeproj -scheme CuraApp -destination 'id=0001DB82-B759-4301-AB9C-F79DC34B9867' test` passes.
-9. Native scheme-level verification executed 19 unit tests and 2 UI tests with 0 failures.
+9. Native scheme-level verification executed 27 unit tests and 2 UI tests with 0 failures.
 10. Device Debug build for connected iPhone `00008150-001643EA0C3A401C` passes when the local development team is supplied outside committed source.
 11. `Cura.app` and embedded `CuraCore.framework` pass `codesign` verification.
 12. `otool -D` verifies embedded `CuraCore.framework` uses `@rpath/CuraCore.framework/CuraCore`.
@@ -87,21 +93,22 @@ Phase 2A reliable local audio capture is implemented and verified locally. Phase
 18. Current device `otool -L` output for `Cura.app/Cura` contains `@rpath/CuraCore.framework/CuraCore` and not `/Library/Frameworks/CuraCore.framework/CuraCore`.
 19. Current device `otool -D` output for embedded `CuraCore.framework/CuraCore` is `@rpath/CuraCore.framework/CuraCore`.
 20. `xcrun devicectl device install app` succeeds for `com.visionbuilt.cura`.
-21. Simulator scheme-level verification still passes with 19 unit tests and 2 UI tests.
+21. Simulator scheme-level verification still passes with 27 unit tests and 2 UI tests.
+22. Phase 2A.1 device Debug build passed for connected iPhone `00008150-001643EA0C3A401C`.
+23. `codesign --verify --deep --strict --verbose=2` passed for the Phase 2A.1 device `Cura.app`.
+24. Device install and launch passed for `com.visionbuilt.cura`.
+25. Physical-device UI automation passed the Phase 2A mock audio flow, including recording duration advancement, playback progress advancement, and relaunch persistence.
 
 ## Blocked
 
-1. Physical-device launch is blocked by iOS security trust for the development signing profile/certificate: `devicectl` reports `RequestDenied` because the profile has not been explicitly trusted by the user. This is not the prior `CuraCore` dyld load error.
-2. Host `codesign --verify` reports `CSSMERR_TP_NOT_TRUSTED` for the device build because the development signing authority is not trusted on this Mac, although embedded signatures are present.
-3. Physical-device UI-test launch is blocked by the test runner identifier `com.visionbuilt.cura.uitests.xctrunner` not being found on device.
-4. Apple Developer account details for committed release/distribution signing.
-5. Supabase project.
-6. RevenueCat project.
-7. Production AI provider accounts.
-8. Final domain and support email.
-9. Trademark clearance.
-10. Legal review.
-11. Final pricing after cost tests.
+1. Apple Developer account details for committed release/distribution signing.
+2. Supabase project.
+3. RevenueCat project.
+4. Production AI provider accounts.
+5. Final domain and support email.
+6. Trademark clearance.
+7. Legal review.
+8. Final pricing after cost tests.
 
 ## Deferred
 
@@ -126,4 +133,4 @@ Phase 2A reliable local audio capture is implemented and verified locally. Phase
 
 ## Next Milestone
 
-Phase 2A satisfies its local audio capture exit criteria. Runtime framework linking is fixed at the project graph and build artifact level; final physical-device launch now requires trusting the development signing profile/certificate on the iPhone before Phase 2B approval.
+Phase 2A.1 satisfies its physical-device audio reliability checks. The exact next recommended action is to approve Phase 2B scope before starting any transcription, cloud upload, AI generation, Supabase, authentication, RevenueCat, or other remote-service work.

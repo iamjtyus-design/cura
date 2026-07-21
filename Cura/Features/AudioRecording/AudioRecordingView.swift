@@ -32,6 +32,7 @@ public struct AudioRecordingView: View {
                 Text(formatDuration(model.duration))
                     .font(.system(.title, design: .monospaced))
                     .accessibilityLabel("Recording duration \(formatDuration(model.duration))")
+                    .accessibilityIdentifier("recordingDuration")
 
                 if let recovered = model.recoveredMetadata, model.state == .interrupted {
                     VStack(alignment: .leading, spacing: 8) {

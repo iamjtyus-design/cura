@@ -1,4 +1,7 @@
 import SwiftUI
+#if os(iOS) && canImport(AVFoundation)
+import AVFoundation
+#endif
 
 public struct SessionDetailView: View {
     @ObservedObject public var model: PhaseOneViewModel
@@ -45,7 +48,9 @@ public struct SessionDetailView: View {
                     .accessibilityIdentifier("favoriteButton")
                 }
 
-                ProcessingStagesView(model: model)
+                if model.shouldShowProcessing(for: session) {
+                    ProcessingStagesView(model: model, sourceType: model.primarySourceType(for: session.id))
+                }
 
                 if let audioSource {
                     AudioPlaybackView(recordingModel: recordingModel, source: audioSource)
@@ -68,16 +73,39 @@ public struct SessionDetailView: View {
                             Text(mode.displayName).tag(mode)
                         }
                     }
+                    Text(mode.guidance)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
                     Picker("Folder", selection: $folderID) {
                         Text("No Folder").tag(UUID?.none)
                         ForEach(model.folders) { folder in
                             Text(folder.name).tag(Optional(folder.id))
                         }
                     }
+                    HStack {
+                        TextField("New folder name", text: $model.newFolderName)
+                            .textFieldStyle(.roundedBorder)
+                            .accessibilityLabel("New folder name")
+                        Button("Add Folder") {
+                            Task {
+                                if let folder = await model.addFolder() {
+                                    folderID = folder.id
+                                }
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                        .accessibilityLabel("Add Folder")
+                    }
+
                     Picker("Processing Mode", selection: $processingMode) {
                         Text("Private").tag(ProcessingMode.private)
                         Text("Smart").tag(ProcessingMode.smart)
                     }
+                    Text(processingMode.guidance)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
                     Button("Save Session Details") {
                         Task {
                             await model.saveSessionMetadata(
@@ -156,5 +184,13 @@ public struct SessionDetailView: View {
             .padding()
         }
         .navigationTitle("Session")
+#if os(iOS) && canImport(AVFoundation)
+        .onReceive(NotificationCenter.default.publisher(for: AVAudioSession.interruptionNotification)) { _ in
+            Task { await recordingModel.handlePlaybackInterruption() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: AVAudioSession.routeChangeNotification)) { _ in
+            Task { await recordingModel.handlePlaybackInterruption() }
+        }
+#endif
     }
 }

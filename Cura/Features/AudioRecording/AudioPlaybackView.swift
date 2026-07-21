@@ -3,6 +3,8 @@ import SwiftUI
 public struct AudioPlaybackView: View {
     @ObservedObject public var recordingModel: AudioRecordingViewModel
     public let source: CaptureSource
+    @State private var displayedPosition: TimeInterval = 0
+    @State private var isScrubbing = false
 
     public init(recordingModel: AudioRecordingViewModel, source: CaptureSource) {
         self.recordingModel = recordingModel
@@ -11,32 +13,46 @@ public struct AudioPlaybackView: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Recording")
+            Text("Audio Recording")
                 .font(.headline)
-            Text(source.originalFilename ?? "Local audio")
-                .font(.subheadline)
-            Text("Duration \(formatDuration(source.duration ?? recordingModel.playbackDuration))")
+            if let originalFilename = source.originalFilename {
+                Text("File \(originalFilename)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Text("\(formatDuration(displayedPlaybackPosition)) / \(formatDuration(totalDuration))")
+                .font(.system(.body, design: .monospaced))
                 .foregroundStyle(.secondary)
             Slider(
                 value: Binding(
-                    get: { recordingModel.playbackPosition },
-                    set: { newValue in Task { await recordingModel.seek(to: newValue) } }
+                    get: { displayedPlaybackPosition },
+                    set: { displayedPosition = $0 }
                 ),
-                in: 0...max(recordingModel.playbackDuration, source.duration ?? 1)
+                in: 0...max(totalDuration, 1),
+                onEditingChanged: { editing in
+                    isScrubbing = editing
+                    if !editing {
+                        Task { await recordingModel.seek(to: displayedPosition) }
+                    }
+                }
             )
             .accessibilityLabel("Audio position")
+            .accessibilityValue("\(formatDuration(displayedPlaybackPosition)) of \(formatDuration(totalDuration))")
+            .accessibilityIdentifier("playbackProgress")
             HStack {
-                Button("Play") {
-                    Task { await recordingModel.play() }
+                Button {
+                    Task {
+                        if recordingModel.isPlaybackPlaying {
+                            await recordingModel.pausePlayback()
+                        } else {
+                            await recordingModel.play()
+                        }
+                    }
+                } label: {
+                    Label(recordingModel.isPlaybackPlaying ? "Pause" : "Play", systemImage: recordingModel.isPlaybackPlaying ? "pause.fill" : "play.fill")
                 }
                 .buttonStyle(.borderedProminent)
-                .accessibilityLabel("Play Recording")
-
-                Button("Pause") {
-                    Task { await recordingModel.pausePlayback() }
-                }
-                .buttonStyle(.bordered)
-                .accessibilityLabel("Pause Recording Playback")
+                .accessibilityLabel(recordingModel.isPlaybackPlaying ? "Pause Recording Playback" : "Play Recording")
             }
         }
         .padding()
@@ -47,5 +63,23 @@ public struct AudioPlaybackView: View {
                 await recordingModel.loadPlayback(url: url)
             }
         }
+        .onChange(of: recordingModel.playbackPosition) { _, position in
+            if !isScrubbing {
+                displayedPosition = position
+            }
+        }
+        .onChange(of: recordingModel.playbackDuration) { _, _ in
+            if !isScrubbing {
+                displayedPosition = recordingModel.playbackPosition
+            }
+        }
+    }
+
+    private var totalDuration: TimeInterval {
+        max(recordingModel.playbackDuration, source.duration ?? 0)
+    }
+
+    private var displayedPlaybackPosition: TimeInterval {
+        isScrubbing ? displayedPosition : recordingModel.playbackPosition
     }
 }

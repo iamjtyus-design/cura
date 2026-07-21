@@ -48,6 +48,13 @@ Current foundation and Phase 1 slice:
 42. Audio playback controls for play, pause, seek, duration, and current position.
 43. Recording/session deletion paths.
 44. Microphone usage description configured in the native iOS app.
+45. Phase 2A.1 recording duration updates several times per second while recording.
+46. Phase 2A.1 playback publishes current time, total duration, playing state, and completion reset.
+47. Playback scrubbing uses local slider state and defers provider seek until drag end.
+48. Audio sessions use friendly "Audio Recording" presentation instead of raw UUID filenames.
+49. Processing stages are hidden until processing is initiated and use source-aware "Reading Audio" or "Reading Video" copy.
+50. Folder creation refreshes choices immediately and can assign the new folder to an existing session.
+51. Learn/Create/Work and Private/Smart helper text is present without implying Smart currently uploads anything.
 
 Verification on 2026-07-20:
 
@@ -111,3 +118,23 @@ Target-reference verification on 2026-07-20:
 12. Physical-device launch is now blocked by iOS security trust for the development signing profile/certificate, reported as `RequestDenied` with "invalid code signature, inadequate entitlements or its profile has not been explicitly trusted by the user"; no dyld `CuraCore` load error was reported.
 13. Host `codesign --verify` reports `CSSMERR_TP_NOT_TRUSTED`, while `codesign -dv` confirms embedded signatures and team identifiers are present on both `Cura.app` and `CuraCore.framework`.
 14. Simulator scheme tests passed again on iPhone 17 Pro, iOS 26.5, UDID `0001DB82-B759-4301-AB9C-F79DC34B9867`, with 19 unit tests and 2 UI tests.
+
+Phase 2A.1 verification on 2026-07-20:
+
+1. Root cause of the frozen recording timer was that the view model only sampled `currentDuration()` on discrete actions such as pause, marker, stop, or interruption.
+2. Root cause of the playback progress and scrubbing issues was that playback position only refreshed after pause/seek, while the slider pushed a provider seek on every drag update.
+3. `AudioRecordingViewModel` now owns cancellable recording and playback timer tasks that poll every 0.2 seconds and stop on pause, stop, cancel, interruption, completion, reset, or failure.
+4. `AVFoundationAudioRecordingProvider` and the mock recorder preserve accurate accumulated duration across pause/resume.
+5. `AVFoundationAudioPlaybackProvider` and the mock playback provider expose playing state, current time, seeking, and completion behavior.
+6. `AudioPlaybackView` displays current time / total duration, uses local scrubbing state, and defers expensive seeking until the drag ends.
+7. Simulator build passed on iPhone 17 Pro, iOS 26.5, UDID `0001DB82-B759-4301-AB9C-F79DC34B9867`.
+8. Native simulator scheme tests passed with 27 unit tests and 2 UI tests.
+9. `swift test` passed with 27 tests.
+10. `swift run CuraSmokeTests` passed.
+11. `sh scripts/secret_scan.sh` passed.
+12. Device Debug build passed for connected iPhone `00008150-001643EA0C3A401C` with the local development team supplied outside committed source.
+13. `codesign --verify --deep --strict --verbose=2` passed for the device `Cura.app`.
+14. `xcrun devicectl device install app` installed `com.visionbuilt.cura` successfully.
+15. `xcrun devicectl device process launch --terminate-existing com.visionbuilt.cura` launched successfully.
+16. Physical-device UI automation passed the Phase 2A mock audio flow, including visible recording duration advancing beyond `00:00`, playback progress advancing beyond `00:00`, and relaunch persistence.
+17. Physical-device UI automation reported a non-fatal Apple diagnostics collection warning after test success.

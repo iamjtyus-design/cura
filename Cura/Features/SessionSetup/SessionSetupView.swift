@@ -20,6 +20,9 @@ public struct SessionSetupView: View {
                         Text(mode.displayName).tag(mode)
                     }
                 }
+                Text(model.setupMode.guidance)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
 
                 Picker("Folder", selection: $model.setupFolderID) {
                     Text("No Folder").tag(UUID?.none)
@@ -27,11 +30,15 @@ public struct SessionSetupView: View {
                         Text(folder.name).tag(Optional(folder.id))
                     }
                 }
+                FolderComposer(model: model)
 
                 Picker("Processing Mode", selection: $model.setupProcessingMode) {
                     Text("Private").tag(ProcessingMode.private)
                     Text("Smart").tag(ProcessingMode.smart)
                 }
+                Text(model.setupProcessingMode.guidance)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Section {

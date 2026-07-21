@@ -27,6 +27,36 @@ final class AudioRecordingTests: XCTestCase {
         XCTAssertEqual(model.state, .recording)
     }
 
+    func testElapsedRecordingTimeAdvancesWhileRecording() async throws {
+        let model = AudioRecordingViewModel(container: .test)
+
+        await model.acceptConsentAndPrepare()
+        await model.startRecording()
+        try await Task.sleep(nanoseconds: 350_000_000)
+
+        XCTAssertGreaterThan(model.duration, 0)
+        await model.cancelRecording()
+    }
+
+    func testPauseResumePreservesAccumulatedDuration() async throws {
+        let model = AudioRecordingViewModel(container: .test)
+
+        await model.acceptConsentAndPrepare()
+        await model.startRecording()
+        try await Task.sleep(nanoseconds: 250_000_000)
+        await model.pauseRecording()
+        let pausedDuration = model.duration
+        try await Task.sleep(nanoseconds: 250_000_000)
+
+        XCTAssertEqual(model.duration, pausedDuration, accuracy: 0.15)
+
+        await model.resumeRecording()
+        try await Task.sleep(nanoseconds: 250_000_000)
+
+        XCTAssertGreaterThan(model.duration, pausedDuration)
+        await model.cancelRecording()
+    }
+
     func testStopAndSaveCreatesSessionAndSource() async throws {
         let container = DependencyContainer.test
         let model = AudioRecordingViewModel(container: container)
@@ -137,5 +167,49 @@ final class AudioRecordingTests: XCTestCase {
         XCTAssertEqual(libraryModel.sessions.first?.id, session.id)
         XCTAssertEqual(libraryModel.audioSource(for: session.id)?.sourceType, .liveAudio)
         try await container.libraryMaintenance?.reset()
+    }
+
+    func testPlaybackProgressAdvancesWhilePlaying() async throws {
+        let container = DependencyContainer.test
+        let model = AudioRecordingViewModel(container: container)
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("m4a")
+        try Data("mock audio".utf8).write(to: url)
+
+        await model.loadPlayback(url: url)
+        await model.play()
+        try await Task.sleep(nanoseconds: 350_000_000)
+
+        XCTAssertTrue(model.isPlaybackPlaying)
+        XCTAssertGreaterThan(model.playbackPosition, 0)
+    }
+
+    func testSeekUpdatesPlaybackPosition() async throws {
+        let container = DependencyContainer.test
+        let model = AudioRecordingViewModel(container: container)
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("m4a")
+        try Data("mock audio".utf8).write(to: url)
+
+        await model.loadPlayback(url: url)
+        await model.seek(to: 1.5)
+
+        XCTAssertEqual(model.playbackPosition, 1.5, accuracy: 0.05)
+    }
+
+    func testPlaybackCompletionResetsPositionAndState() async throws {
+        let container = DependencyContainer.make(
+            configuration: .development,
+            audioRecorder: MockAudioRecordingProvider(),
+            audioPlayback: MockAudioPlaybackProvider(duration: 0.25)
+        )
+        let model = AudioRecordingViewModel(container: container)
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("m4a")
+        try Data("mock audio".utf8).write(to: url)
+
+        await model.loadPlayback(url: url)
+        await model.play()
+        try await Task.sleep(nanoseconds: 550_000_000)
+
+        XCTAssertFalse(model.isPlaybackPlaying)
+        XCTAssertEqual(model.playbackPosition, 0, accuracy: 0.05)
     }
 }
