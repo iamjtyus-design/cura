@@ -45,6 +45,8 @@ final class CuraUITests: XCTestCase {
         XCTAssertTrue(titleField.waitForExistence(timeout: 5))
         titleField.replaceText(with: "Field Memo")
         app.swipeUp()
+        XCTAssertTrue(app.buttons["Session Info"].waitForExistence(timeout: 5))
+        app.buttons["Session Info"].tap()
         XCTAssertTrue(app.buttons["Save Session Details"].waitForExistence(timeout: 5))
         app.buttons["Save Session Details"].tap()
         app.swipeDown()
@@ -108,7 +110,8 @@ final class CuraUITests: XCTestCase {
         retryApp.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Audio Recording")).firstMatch.tap()
         XCTAssertTrue(retryApp.buttons["Retry Create Curated Note"].waitForExistence(timeout: 5))
         retryApp.buttons["Retry Create Curated Note"].tap()
-        XCTAssertTrue(retryApp.textFields["suggestedTitleField"].waitForExistence(timeout: 8))
+        XCTAssertTrue(retryApp.textFields["topSessionTitleField"].waitForValueContaining("Launch Checklist Field Memo", timeout: 8))
+        XCTAssertTrue(retryApp.buttons["undoGeneratedTitleButton"].waitForExistence(timeout: 5))
         retryApp.buttons["Transcript"].tap()
         XCTAssertTrue(retryApp.staticTexts["transcriptText"].waitForExistence(timeout: 5))
     }

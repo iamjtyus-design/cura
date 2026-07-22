@@ -3,12 +3,14 @@ import SwiftUI
 public struct AudioPlaybackView: View {
     @ObservedObject public var recordingModel: AudioRecordingViewModel
     public let source: CaptureSource
+    public var removeMissingSource: (() -> Void)?
     @State private var displayedPosition: TimeInterval = 0
     @State private var isScrubbing = false
 
-    public init(recordingModel: AudioRecordingViewModel, source: CaptureSource) {
+    public init(recordingModel: AudioRecordingViewModel, source: CaptureSource, removeMissingSource: (() -> Void)? = nil) {
         self.recordingModel = recordingModel
         self.source = source
+        self.removeMissingSource = removeMissingSource
     }
 
     public var body: some View {
@@ -26,6 +28,13 @@ public struct AudioPlaybackView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .accessibilityIdentifier("playbackUnavailableMessage")
+                if let removeMissingSource {
+                    Button("Remove Missing Recording Reference", role: .destructive) {
+                        removeMissingSource()
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityIdentifier("removeMissingRecordingReferenceButton")
+                }
             }
             Slider(
                 value: Binding(

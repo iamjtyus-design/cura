@@ -267,6 +267,13 @@ public final class PhaseOneViewModel: ObservableObject {
         updated.structuredActionItems = actionItems
         updated.actionItems = actionItems.map(\.title)
         updated.userNotes = userNotes
+        updated.documentBlocks = documentBlocks(
+            title: updated.confirmedTitle ?? updated.suggestedTitle ?? updated.title,
+            summary: summary,
+            keyPoints: keyPoints,
+            actionItems: actionItems,
+            userNotes: userNotes
+        )
         updated.updatedAt = Date()
 
         do {
@@ -430,7 +437,7 @@ public final class PhaseOneViewModel: ObservableObject {
 
             try Task.checkCancellation()
             let now = Date()
-            let note = makeCuratedNote(
+            var note = makeCuratedNote(
                 session: processingSession,
                 source: source,
                 result: result,
@@ -440,6 +447,14 @@ public final class PhaseOneViewModel: ObservableObject {
             var completedSession = processingSession
             completedSession.status = .completed
             completedSession.updatedAt = now
+            if shouldAutoApplySuggestedTitle(for: processingSession, note: note),
+               let suggestedTitle = note.suggestedTitle?.trimmingCharacters(in: .whitespacesAndNewlines),
+               !suggestedTitle.isEmpty {
+                completedSession.title = suggestedTitle
+                note.title = suggestedTitle
+                note.confirmedTitle = suggestedTitle
+                note.updatedAt = now
+            }
             try await container.curatedNotes.save(note)
             try await container.sessions.save(completedSession)
             curatedNoteProgressBySessionID[session.id] = TranscriptionProgress(status: .completed, fractionCompleted: 1)
@@ -507,8 +522,70 @@ public final class PhaseOneViewModel: ObservableObject {
             structuredActionItems: result.actionItems,
             userNotes: "",
             generationStatus: .completed,
-            generationError: nil
+            generationError: nil,
+            documentBlocks: documentBlocks(from: result)
         )
+    }
+
+    private func documentBlocks(from result: TranscriptionResult) -> [CuratedNoteBlock] {
+        documentBlocks(
+            title: result.suggestedTitle,
+            summary: result.summary,
+            keyPoints: result.keyPoints,
+            actionItems: result.actionItems,
+            userNotes: ""
+        )
+    }
+
+    private func documentBlocks(
+        title: String?,
+        summary: String,
+        keyPoints: [String],
+        actionItems: [CuratedActionItem],
+        userNotes: String
+    ) -> [CuratedNoteBlock] {
+        var blocks: [CuratedNoteBlock] = []
+        if let title, !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            blocks.append(CuratedNoteBlock(type: .heading, origin: .generated, text: title))
+        }
+        if !summary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            blocks.append(CuratedNoteBlock(type: .paragraph, origin: .generated, text: summary))
+        }
+        blocks.append(contentsOf: keyPoints.map {
+            CuratedNoteBlock(type: .bulletList, origin: .generated, text: $0)
+        })
+        blocks.append(contentsOf: actionItems.map {
+            CuratedNoteBlock(type: .checklist, origin: .generated, text: $0.title, isChecked: $0.isCompleted)
+        })
+        if !userNotes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            blocks.append(CuratedNoteBlock(type: .paragraph, origin: .userAuthored, text: userNotes))
+        }
+        return blocks
+    }
+
+    public func undoGeneratedTitle(for session: CaptureSession, note: CuratedNote) async {
+        var updatedSession = session
+        var updatedNote = note
+        updatedSession.title = "Audio Recording"
+        updatedSession.updatedAt = Date()
+        updatedNote.confirmedTitle = nil
+        updatedNote.title = "Audio Recording"
+        updatedNote.updatedAt = updatedSession.updatedAt
+        do {
+            try await container.sessions.save(updatedSession)
+            try await container.curatedNotes.save(updatedNote)
+            selectedSession = updatedSession
+            notesBySessionID[session.id] = updatedNote
+            await refreshPublishedState()
+        } catch {
+            errorMessage = "The generated title could not be undone."
+        }
+    }
+
+    private func shouldAutoApplySuggestedTitle(for session: CaptureSession, note: CuratedNote) -> Bool {
+        let title = session.title.trimmingCharacters(in: .whitespacesAndNewlines)
+        let suggested = note.suggestedTitle?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return title == "Audio Recording" && note.confirmedTitle == nil && !suggested.isEmpty
     }
 
     private func isSupportedVideo(_ url: URL) -> Bool {

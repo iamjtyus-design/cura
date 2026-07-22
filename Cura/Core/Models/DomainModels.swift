@@ -151,6 +151,46 @@ public struct CuratedActionItem: Identifiable, Codable, Equatable, Sendable {
     }
 }
 
+public enum CuratedNoteBlockType: String, Codable, CaseIterable, Sendable {
+    case heading
+    case paragraph
+    case bold
+    case italic
+    case bulletList
+    case numberedList
+    case checklist
+}
+
+public enum CuratedNoteBlockOrigin: String, Codable, CaseIterable, Sendable {
+    case generated
+    case userAuthored
+}
+
+public struct CuratedNoteBlock: Identifiable, Codable, Equatable, Sendable {
+    public var id: UUID
+    public var type: CuratedNoteBlockType
+    public var origin: CuratedNoteBlockOrigin
+    public var text: String
+    public var children: [CuratedNoteBlock]
+    public var isChecked: Bool?
+
+    public init(
+        id: UUID = UUID(),
+        type: CuratedNoteBlockType,
+        origin: CuratedNoteBlockOrigin,
+        text: String,
+        children: [CuratedNoteBlock] = [],
+        isChecked: Bool? = nil
+    ) {
+        self.id = id
+        self.type = type
+        self.origin = origin
+        self.text = text
+        self.children = children
+        self.isChecked = isChecked
+    }
+}
+
 public struct EvidenceReference: Identifiable, Codable, Equatable, Sendable {
     public var id: UUID
     public var sourceID: UUID
@@ -342,6 +382,7 @@ public struct CuratedNote: Identifiable, Codable, Equatable, Sendable {
     public var userNotes: String
     public var generationStatus: CuratedNoteGenerationStatus
     public var generationError: String?
+    public var documentBlocks: [CuratedNoteBlock]
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -380,6 +421,7 @@ public struct CuratedNote: Identifiable, Codable, Equatable, Sendable {
         case userNotes
         case generationStatus
         case generationError
+        case documentBlocks
     }
 
     public init(
@@ -417,7 +459,8 @@ public struct CuratedNote: Identifiable, Codable, Equatable, Sendable {
         structuredActionItems: [CuratedActionItem] = [],
         userNotes: String = "",
         generationStatus: CuratedNoteGenerationStatus = .completed,
-        generationError: String? = nil
+        generationError: String? = nil,
+        documentBlocks: [CuratedNoteBlock] = []
     ) {
         self.id = id
         self.sessionID = sessionID
@@ -454,6 +497,7 @@ public struct CuratedNote: Identifiable, Codable, Equatable, Sendable {
         self.userNotes = userNotes
         self.generationStatus = generationStatus
         self.generationError = generationError
+        self.documentBlocks = documentBlocks
     }
 
     public init(from decoder: Decoder) throws {
@@ -498,6 +542,7 @@ public struct CuratedNote: Identifiable, Codable, Equatable, Sendable {
         userNotes = try container.decodeIfPresent(String.self, forKey: .userNotes) ?? ""
         generationStatus = try container.decodeIfPresent(CuratedNoteGenerationStatus.self, forKey: .generationStatus) ?? .completed
         generationError = try container.decodeIfPresent(String.self, forKey: .generationError)
+        documentBlocks = try container.decodeIfPresent([CuratedNoteBlock].self, forKey: .documentBlocks) ?? []
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -537,6 +582,7 @@ public struct CuratedNote: Identifiable, Codable, Equatable, Sendable {
         try container.encode(userNotes, forKey: .userNotes)
         try container.encode(generationStatus, forKey: .generationStatus)
         try container.encodeIfPresent(generationError, forKey: .generationError)
+        try container.encode(documentBlocks, forKey: .documentBlocks)
     }
 }
 

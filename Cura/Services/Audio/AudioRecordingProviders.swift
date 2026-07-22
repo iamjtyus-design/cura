@@ -3,6 +3,20 @@ import Foundation
 import AVFoundation
 #endif
 
+#if os(iOS) && canImport(AVFoundation) && DEBUG
+fileprivate func debugAudioLog(_ event: String, url: URL? = nil, duration: TimeInterval? = nil, position: TimeInterval? = nil) {
+    let session = AVAudioSession.sharedInstance()
+    let route = session.currentRoute.outputs.map { "\($0.portType.rawValue):\($0.portName)" }.joined(separator: ", ")
+    let exists = url.map { FileManager.default.fileExists(atPath: $0.path) } ?? false
+    let fileSize = url.flatMap { try? FileManager.default.attributesOfItem(atPath: $0.path)[.size] as? NSNumber }?.intValue
+    let path = url?.path ?? "nil"
+    let sizeText = fileSize.map(String.init) ?? "nil"
+    let durationText = duration.map { String($0) } ?? "nil"
+    let positionText = position.map { String($0) } ?? "nil"
+    print("[CURA Audio DEBUG] \(event) url=\(path) exists=\(exists) size=\(sizeText) duration=\(durationText) position=\(positionText) route=\(route)")
+}
+#endif
+
 public struct AudioRecordingConfiguration: Equatable, Sendable {
     public var sampleRate: Double
     public var channelCount: Int
@@ -36,9 +50,16 @@ public protocol AudioPlaybackProviding: Sendable {
 }
 
 #if os(iOS) && canImport(AVFoundation)
+public enum AudioFileValidationError: Error, Equatable {
+    case recorderDidNotStart
+    case finalizedFileMissing
+    case finalizedFileEmpty
+    case finalizedFileHasNoDuration
+    case playbackDidNotStart
+}
+
 public actor AVFoundationAudioRecordingProvider: AudioRecordingProviding {
     private var recorder: AVAudioRecorder?
-    private var startedAt: Date?
     private var accumulatedDuration: TimeInterval = 0
 
     public init() {}
@@ -65,8 +86,10 @@ public actor AVFoundationAudioRecordingProvider: AudioRecordingProviding {
     }
 
     public func startRecording(to url: URL, configuration: AudioRecordingConfiguration) async throws {
-        try AVAudioSession.sharedInstance().setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
-        try AVAudioSession.sharedInstance().setActive(true)
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        let session = AVAudioSession.sharedInstance()
+        try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetoothHFP, .allowBluetoothA2DP])
+        try session.setActive(true)
 
         let settings: [String: Any] = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
@@ -74,31 +97,41 @@ public actor AVFoundationAudioRecordingProvider: AudioRecordingProviding {
             AVNumberOfChannelsKey: configuration.channelCount,
             AVEncoderBitRateKey: configuration.bitRate
         ]
-        recorder = try AVAudioRecorder(url: url, settings: settings)
-        recorder?.isMeteringEnabled = true
-        recorder?.record()
-        startedAt = Date()
+        let recorder = try AVAudioRecorder(url: url, settings: settings)
+        recorder.isMeteringEnabled = true
+        guard recorder.record() else {
+            throw AudioFileValidationError.recorderDidNotStart
+        }
+        self.recorder = recorder
         accumulatedDuration = 0
+#if DEBUG
+        debugAudioLog("recording started", url: url)
+#endif
     }
 
     public func pauseRecording() async throws {
         accumulatedDuration = await currentDuration()
         recorder?.pause()
-        startedAt = nil
     }
 
     public func resumeRecording() async throws {
-        recorder?.record()
-        startedAt = Date()
+        guard recorder?.record() == true else {
+            throw AudioFileValidationError.recorderDidNotStart
+        }
     }
 
     public func stopRecording() async throws -> TimeInterval {
         let duration = await currentDuration()
         recorder?.stop()
+        let url = recorder?.url
         recorder = nil
-        startedAt = nil
         accumulatedDuration = duration
         try AVAudioSession.sharedInstance().setActive(false, options: [.notifyOthersOnDeactivation])
+#if DEBUG
+        if let url {
+            debugAudioLog("recording stopped", url: url)
+        }
+#endif
         return duration
     }
 
@@ -108,14 +141,10 @@ public actor AVFoundationAudioRecordingProvider: AudioRecordingProviding {
             try FileManager.default.removeItem(at: url)
         }
         recorder = nil
-        startedAt = nil
         accumulatedDuration = 0
     }
 
     public func currentDuration() async -> TimeInterval {
-        if let startedAt {
-            return accumulatedDuration + Date().timeIntervalSince(startedAt)
-        }
         if let recorder {
             return recorder.currentTime
         }
@@ -129,9 +158,22 @@ public actor AVFoundationAudioPlaybackProvider: AudioPlaybackProviding {
     public init() {}
 
     public func load(url: URL) async throws -> TimeInterval {
-        player = try AVAudioPlayer(contentsOf: url)
-        player?.prepareToPlay()
-        return player?.duration ?? 0
+        let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
+        let fileSize = attributes[.size] as? NSNumber
+        guard (fileSize?.intValue ?? 0) > 0 else {
+            throw AudioFileValidationError.finalizedFileEmpty
+        }
+
+        let player = try AVAudioPlayer(contentsOf: url)
+        player.prepareToPlay()
+        guard player.duration > 0 else {
+            throw AudioFileValidationError.finalizedFileHasNoDuration
+        }
+        self.player = player
+#if DEBUG
+        debugAudioLog("player loaded", url: url, duration: player.duration)
+#endif
+        return player.duration
     }
 
     public func play() async throws {
@@ -141,10 +183,15 @@ public actor AVFoundationAudioPlaybackProvider: AudioPlaybackProviding {
         if player.currentTime >= player.duration {
             player.currentTime = 0
         }
-        try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.defaultToSpeaker])
-        try AVAudioSession.sharedInstance().setActive(true)
+        let session = AVAudioSession.sharedInstance()
+        try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetoothHFP, .allowBluetoothA2DP])
+        try session.setActive(true)
+        try? session.overrideOutputAudioPort(.speaker)
+#if DEBUG
+        debugAudioLog("play requested", duration: player.duration, position: player.currentTime)
+#endif
         guard player.play() else {
-            throw CocoaError(.fileReadUnknown)
+            throw AudioFileValidationError.playbackDidNotStart
         }
     }
 

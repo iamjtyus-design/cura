@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 2B.1.1 physical-device QA remediation is implemented for the local/demo audio transcription and editable Curated Note slice. Production transcription, cloud upload, live AI generation, Supabase, RevenueCat, authentication, and Phase 2B.2 work have not started.
+Phase 2B.1.2 physical-device playback and session-experience remediation is implemented for the local/demo audio transcription and editable Curated Note slice. Production transcription, cloud upload, live AI generation, Supabase, RevenueCat, authentication, and Phase 2B.2 work have not started.
 
 ## Completed
 
@@ -87,6 +87,13 @@ Phase 2B.1.1 physical-device QA remediation is implemented for the local/demo au
 79. Phase 2B.1.1 UI labels deterministic mock transcripts and Curated Notes as demo sample content not generated from the user's recording.
 80. Phase 2B.1.1 hides completed audio processing panels, removes Creator Pack implication from audio note creation, and keeps audio stages to Preparing Audio, Transcribing, Building Curated Note, and Ready.
 81. Phase 2B.1.1 improves title acceptance, inline save feedback, action completion controls, multiline note editing, folder disclosure, and friendly recording metadata.
+82. Phase 2B.1.2 validates finalized audio files through the playback provider before persisting fresh recording sources.
+83. Phase 2B.1.2 configures AVFoundation playback for a speaker-forward route after recording on physical devices.
+84. Phase 2B.1.2 keeps missing legacy audio-file failures localized to the affected session and preserves its transcript and Curated Note.
+85. Phase 2B.1.2 shortens deterministic demo transcription to an approximately 3-second staged flow for `local-demo-mock`.
+86. Phase 2B.1.2 auto-applies generated suggested titles only for untouched fallback audio titles and offers an Undo affordance.
+87. Phase 2B.1.2 moves saved-session organization controls into a secondary Session Info disclosure.
+88. Phase 2B.1.2 adds migration-safe Curated Note document blocks for future formatted editable notes without replacing the current UI.
 
 ## Verification
 
@@ -94,11 +101,11 @@ Phase 2B.1.1 physical-device QA remediation is implemented for the local/demo au
 2. `xcodebuild -project Cura.xcodeproj -target CuraApp -sdk iphonesimulator build` passes.
 3. `xcodebuild -project Cura.xcodeproj -target CuraTests -sdk iphonesimulator build` passes.
 4. `xcodebuild -project Cura.xcodeproj -target CuraUITests -sdk iphonesimulator build` passes.
-5. `swift test` passes 42 tests.
+5. `swift test` passes 49 tests.
 6. `swift run CuraSmokeTests` passes.
 7. `sh scripts/secret_scan.sh` passes.
 8. `xcodebuild -project Cura.xcodeproj -scheme CuraApp -destination 'id=0001DB82-B759-4301-AB9C-F79DC34B9867' test` passes.
-9. Native scheme-level verification executed 42 unit tests and 3 UI tests with 0 failures in the latest full run.
+9. Native scheme-level verification executed 49 unit tests and 3 UI tests with 0 failures in the latest full run.
 10. Device Debug build for connected iPhone `00008150-001643EA0C3A401C` passes when the local development team is supplied outside committed source.
 11. `Cura.app` and embedded `CuraCore.framework` pass `codesign` verification.
 12. `otool -D` verifies embedded `CuraCore.framework` uses `@rpath/CuraCore.framework/CuraCore`.
@@ -132,6 +139,15 @@ Phase 2B.1.1 physical-device QA remediation is implemented for the local/demo au
 40. Phase 2B.1.1 device Debug build passed for connected iPhone `6A67316D-CE7A-5520-B8B7-BCAEBE23E5F3`.
 41. Phase 2B.1.1 `Cura.app` and embedded `CuraCore.framework` passed code-signature verification.
 42. Phase 2B.1.1 device install and launch passed for `com.visionbuilt.cura`.
+43. Phase 2B.1.2 Swift package tests passed with 49 tests.
+44. Phase 2B.1.2 full native scheme-level tests passed on iPhone 17 Pro simulator, iOS 26.5, with 49 unit tests and 3 UI tests.
+45. Phase 2B.1.2 simulator build passed.
+46. Phase 2B.1.2 smoke test passed.
+47. Phase 2B.1.2 secret scan passed.
+48. Phase 2B.1.2 device Debug build passed for connected iPhone `6A67316D-CE7A-5520-B8B7-BCAEBE23E5F3`.
+49. Phase 2B.1.2 `Cura.app` and embedded `CuraCore.framework` passed code-signature verification.
+50. Phase 2B.1.2 device install and launch passed for `com.visionbuilt.cura`.
+51. Phase 2B.1.2 focused physical-device UI playback automation was attempted, but the Xcode UI test runner timed out enabling automation mode before executing the test.
 
 ## Blocked
 
@@ -167,4 +183,4 @@ Phase 2B.1.1 physical-device QA remediation is implemented for the local/demo au
 
 ## Next Milestone
 
-Phase 2B.1.1 satisfies the requested physical-device QA remediation once commit and push are complete. The exact next recommended action after approval is Phase 2B.2 provider selection and production-transcription architecture, without starting cloud upload, Supabase, RevenueCat, authentication, or publishing until explicitly approved.
+Phase 2B.1.2 satisfies the requested playback and session-experience remediation once commit and push are complete. The exact next recommended action after approval is human physical-device audible playback retest, then Phase 2B.2 provider selection and production-transcription architecture without starting cloud upload, Supabase, RevenueCat, authentication, or publishing until explicitly approved.

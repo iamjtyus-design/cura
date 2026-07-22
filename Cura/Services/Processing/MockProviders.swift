@@ -88,7 +88,7 @@ public struct MockTranscriptionProvider: TranscriptionProviding {
 
     public init(
         providerName: String = "local-demo-mock",
-        stageDelayNanoseconds: UInt64 = 250_000_000,
+        stageDelayNanoseconds: UInt64 = 1_000_000_000,
         shouldFail: Bool = false,
         shouldReturnEmptyTranscript: Bool = false
     ) {

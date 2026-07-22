@@ -19,6 +19,9 @@ final class AudioTranscriptionTests: XCTestCase {
         XCTAssertEqual(note.summary, note.smartSummary)
         XCTAssertEqual(note.keyPoints.count, 3)
         XCTAssertEqual(note.structuredActionItems.count, 3)
+        XCTAssertEqual(model.selectedSession?.title, "Launch Checklist Field Memo")
+        XCTAssertEqual(note.confirmedTitle, "Launch Checklist Field Memo")
+        XCTAssertFalse(note.documentBlocks.isEmpty)
         XCTAssertFalse(model.shouldShowProcessing(for: try XCTUnwrap(model.selectedSession)))
     }
 
@@ -78,6 +81,20 @@ final class AudioTranscriptionTests: XCTestCase {
         XCTAssertNil(note.suggestedTitle)
         XCTAssertTrue(note.structuredActionItems.isEmpty)
         XCTAssertEqual(note.title, "Audio Recording")
+        XCTAssertEqual(model.selectedSession?.title, "Audio Recording")
+    }
+
+    func testMockTranscriptionDefaultDurationIsStagedButFast() async throws {
+        let started = Date()
+        _ = try await MockTranscriptionProvider().transcribe(
+            session: CaptureSession(title: "Audio Recording", mode: .create),
+            source: CaptureSource(sessionID: UUID(), sourceType: .liveAudio),
+            progress: { _ in }
+        )
+        let elapsed = Date().timeIntervalSince(started)
+
+        XCTAssertGreaterThanOrEqual(elapsed, 3)
+        XCTAssertLessThan(elapsed, 6)
     }
 
     func testSuggestedTitleAcceptanceAndManualTitlePreservation() async throws {
@@ -95,12 +112,35 @@ final class AudioTranscriptionTests: XCTestCase {
         let sessionBeforeAccept = try await container.sessions.fetch(id: session.id)
         XCTAssertEqual(sessionBeforeAccept?.title, "My Manual Title")
         XCTAssertEqual(note.suggestedTitle, "Launch Checklist Field Memo")
+        XCTAssertNil(note.confirmedTitle)
 
         await model.acceptSuggestedTitle(for: session, note: note, editedTitle: "Edited Launch Memo")
         let sessionAfterAccept = try await container.sessions.fetch(id: session.id)
         XCTAssertEqual(sessionAfterAccept?.title, "Edited Launch Memo")
         XCTAssertEqual(model.selectedSession?.title, "Edited Launch Memo")
         XCTAssertEqual(model.note(for: session.id)?.confirmedTitle, "Edited Launch Memo")
+    }
+
+    func testAutomaticTitleAppliesOnlyToUntouchedFallbackTitle() async throws {
+        let container = DependencyContainer.make(configuration: .development, processingStageDelayNanoseconds: 1)
+        let model = PhaseOneViewModel(container: container)
+        let session = try await saveAudioSession(in: container)
+
+        await model.reloadForTesting()
+        model.startCuratedNoteProcessing(for: session)
+        try await waitForNote(sessionID: session.id, in: model)
+
+        let savedSession = try await container.sessions.fetch(id: session.id)
+        let note = try XCTUnwrap(model.note(for: session.id))
+        XCTAssertEqual(savedSession?.title, "Launch Checklist Field Memo")
+        XCTAssertEqual(note.suggestedTitle, "Launch Checklist Field Memo")
+        XCTAssertEqual(note.confirmedTitle, "Launch Checklist Field Memo")
+
+        await model.undoGeneratedTitle(for: try XCTUnwrap(savedSession), note: note)
+        let undoneSession = try await container.sessions.fetch(id: session.id)
+        let undoneNote = try await container.curatedNotes.fetchNote(for: session.id)
+        XCTAssertEqual(undoneSession?.title, "Audio Recording")
+        XCTAssertNil(undoneNote?.confirmedTitle)
     }
 
     func testCuratedNoteEditsPersistActionCompletionAndMultilineKeyPoints() async throws {
@@ -130,6 +170,8 @@ final class AudioTranscriptionTests: XCTestCase {
         XCTAssertEqual(persisted.keyPoints.first, "First line\nsecond line")
         XCTAssertTrue(persisted.structuredActionItems[0].isCompleted)
         XCTAssertEqual(persisted.userNotes, "Reviewer note")
+        XCTAssertTrue(persisted.documentBlocks.contains { $0.origin == .userAuthored && $0.text == "Reviewer note" })
+        XCTAssertTrue(persisted.documentBlocks.contains { $0.type == .checklist && $0.isChecked == true })
     }
 
     func testCuratedNotePersistenceAndMigrationCompatibility() async throws {
@@ -176,6 +218,7 @@ final class AudioTranscriptionTests: XCTestCase {
         XCTAssertEqual(legacyNote.summary, "Old summary")
         XCTAssertEqual(legacyNote.transcript, "")
         XCTAssertEqual(legacyNote.generationStatus, .completed)
+        XCTAssertTrue(legacyNote.documentBlocks.isEmpty)
     }
 
     func testActionItemEvidenceBehavior() async throws {

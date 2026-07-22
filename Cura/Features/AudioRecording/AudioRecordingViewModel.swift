@@ -15,6 +15,9 @@ public final class AudioRecordingViewModel: ObservableObject {
     @Published public private(set) var savedSession: CaptureSession?
     @Published public private(set) var savedSource: CaptureSource?
     @Published public private(set) var playbackUnavailableMessage = ""
+#if DEBUG
+    @Published public private(set) var debugPlaybackDiagnostics = ""
+#endif
     @Published public var showConsentNotice = false
     @Published public var errorMessage = ""
 
@@ -181,7 +184,8 @@ public final class AudioRecordingViewModel: ObservableObject {
         stopRecordingTimer()
         transition(to: .stopping)
         do {
-            let finalDuration = try await container.audioRecorder.stopRecording()
+            _ = try await container.audioRecorder.stopRecording()
+            let finalDuration = try await finalizedAudioDuration(at: fileURL)
             let title = "Audio Recording"
             let session = CaptureSession(id: sessionID, title: title, mode: .create, status: .ready)
             let source = CaptureSource(
@@ -189,7 +193,7 @@ public final class AudioRecordingViewModel: ObservableObject {
                 sessionID: sessionID,
                 sourceType: .liveAudio,
                 localIdentifier: fileURL.path,
-                originalFilename: fileURL.lastPathComponent,
+                originalFilename: "Audio Recording.m4a",
                 mimeType: "audio/mp4",
                 duration: finalDuration,
                 sourceURL: fileURL,
@@ -202,6 +206,7 @@ public final class AudioRecordingViewModel: ObservableObject {
             savedSession = session
             savedSource = source
             transition(to: .completed)
+            await loadPlayback(url: fileURL)
         } catch {
             stopRecordingTimer()
             transition(to: .failed)
@@ -243,6 +248,9 @@ public final class AudioRecordingViewModel: ObservableObject {
         guard FileManager.default.fileExists(atPath: url.path) else {
             clearPlaybackState()
             playbackUnavailableMessage = "Recording file is no longer available on this device."
+#if DEBUG
+            debugPlaybackDiagnostics = "missing file at \(url.path)"
+#endif
             return
         }
 
@@ -253,9 +261,15 @@ public final class AudioRecordingViewModel: ObservableObject {
             playbackPosition = await container.audioPlayback.currentTime()
             isPlaybackPlaying = false
             loadedPlaybackURL = url
+#if DEBUG
+            debugPlaybackDiagnostics = try diagnostics(for: url, event: "loaded", duration: playbackDuration)
+#endif
         } catch {
             clearPlaybackState()
             playbackUnavailableMessage = "Recording playback is unavailable for this file."
+#if DEBUG
+            debugPlaybackDiagnostics = "load failed for \(url.path): \(error)"
+#endif
         }
     }
 
@@ -279,6 +293,9 @@ public final class AudioRecordingViewModel: ObservableObject {
         } catch {
             isPlaybackPlaying = false
             errorMessage = "Recording playback could not start."
+#if DEBUG
+            debugPlaybackDiagnostics = "play failed: \(error)"
+#endif
         }
     }
 
@@ -356,6 +373,33 @@ public final class AudioRecordingViewModel: ObservableObject {
         playbackUnavailableMessage = ""
         loadedPlaybackURL = nil
     }
+
+    private func finalizedAudioDuration(at url: URL) async throws -> TimeInterval {
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            throw CocoaError(.fileReadNoSuchFile)
+        }
+        let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
+        let fileSize = (attributes[.size] as? NSNumber)?.intValue ?? 0
+        guard fileSize > 0 else {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+        let duration = try await container.audioPlayback.load(url: url)
+        guard duration > 0 else {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+#if DEBUG
+        debugPlaybackDiagnostics = try diagnostics(for: url, event: "finalized", duration: duration)
+#endif
+        return duration
+    }
+
+#if DEBUG
+    private func diagnostics(for url: URL, event: String, duration: TimeInterval) throws -> String {
+        let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
+        let fileSize = (attributes[.size] as? NSNumber)?.intValue ?? 0
+        return "\(event): exists=\(FileManager.default.fileExists(atPath: url.path)) size=\(fileSize) duration=\(duration) url=\(url.path)"
+    }
+#endif
 
     private func startRecordingTimer() {
         stopRecordingTimer()

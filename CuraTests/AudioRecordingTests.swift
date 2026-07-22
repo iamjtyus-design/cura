@@ -74,6 +74,112 @@ final class AudioRecordingTests: XCTestCase {
         XCTAssertEqual(session.mode, .create)
     }
 
+    func testFreshRecordingPersistsDurablePlayableSourceURL() async throws {
+        let playback = TrackingAudioPlaybackProvider()
+        let container = DependencyContainer.make(
+            configuration: .development,
+            audioRecorder: MockAudioRecordingProvider(),
+            audioPlayback: playback
+        )
+        let model = AudioRecordingViewModel(container: container)
+
+        await model.acceptConsentAndPrepare()
+        await model.startRecording()
+        await model.stopAndSave()
+
+        let source = try XCTUnwrap(model.savedSource)
+        let url = try XCTUnwrap(source.sourceURL)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: url.path))
+        XCTAssertTrue(url.path.contains("/Media/\(source.sessionID.uuidString)/"))
+        let loadedURL = await playback.lastLoadedURL()
+        XCTAssertEqual(loadedURL, url)
+        XCTAssertEqual(model.playbackDuration, 3, accuracy: 0.05)
+    }
+
+    func testFreshPlaybackSurvivesSessionCloseAndReopen() async throws {
+        let playback = TrackingAudioPlaybackProvider()
+        let container = DependencyContainer.make(
+            configuration: .development,
+            audioRecorder: MockAudioRecordingProvider(),
+            audioPlayback: playback
+        )
+        let model = AudioRecordingViewModel(container: container)
+
+        await model.acceptConsentAndPrepare()
+        await model.startRecording()
+        await model.stopAndSave()
+
+        let source = try XCTUnwrap(model.savedSource)
+        await model.prepareForNewCapturePresentation()
+        await model.loadPlayback(url: try XCTUnwrap(source.sourceURL))
+        await model.play(url: source.sourceURL)
+
+        XCTAssertTrue(model.isPlaybackPlaying)
+        let loadedURL = await playback.lastLoadedURL()
+        XCTAssertEqual(loadedURL, source.sourceURL)
+    }
+
+    func testFreshPlaybackSurvivesOrdinaryRelaunch() async throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("cura-audio-relaunch-playback")
+            .appendingPathComponent(UUID().uuidString)
+        let firstPlayback = TrackingAudioPlaybackProvider()
+        let container = DependencyContainer.makeLocalJSON(
+            configuration: .development,
+            rootDirectory: root,
+            audioRecorder: MockAudioRecordingProvider(),
+            audioPlayback: firstPlayback
+        )
+        let model = AudioRecordingViewModel(container: container)
+        await model.acceptConsentAndPrepare()
+        await model.startRecording()
+        await model.stopAndSave()
+        let session = try XCTUnwrap(model.savedSession)
+
+        let secondPlayback = TrackingAudioPlaybackProvider()
+        let relaunched = DependencyContainer.makeLocalJSON(
+            configuration: .development,
+            rootDirectory: root,
+            audioRecorder: MockAudioRecordingProvider(),
+            audioPlayback: secondPlayback
+        )
+        let library = PhaseOneViewModel(container: relaunched, arguments: [])
+        let playbackModel = AudioRecordingViewModel(container: relaunched)
+        await library.loadIfNeeded()
+        let source = try XCTUnwrap(library.audioSource(for: session.id))
+
+        await playbackModel.loadPlayback(url: try XCTUnwrap(source.sourceURL))
+        await playbackModel.play(url: source.sourceURL)
+
+        XCTAssertTrue(playbackModel.isPlaybackPlaying)
+        let loadedURL = await secondPlayback.lastLoadedURL()
+        XCTAssertEqual(loadedURL, source.sourceURL)
+        try await relaunched.libraryMaintenance?.reset()
+    }
+
+    func testMultipleFreshRecordingsRemainIndependentlyPlayable() async throws {
+        let container = DependencyContainer.make(
+            configuration: .development,
+            audioRecorder: MockAudioRecordingProvider(),
+            audioPlayback: TrackingAudioPlaybackProvider()
+        )
+        let first = AudioRecordingViewModel(container: container)
+        await first.acceptConsentAndPrepare()
+        await first.startRecording()
+        await first.stopAndSave()
+
+        let second = AudioRecordingViewModel(container: container)
+        await second.acceptConsentAndPrepare()
+        await second.startRecording()
+        await second.stopAndSave()
+
+        let firstURL = try XCTUnwrap(first.savedSource?.sourceURL)
+        let secondURL = try XCTUnwrap(second.savedSource?.sourceURL)
+        XCTAssertNotEqual(firstURL, secondURL)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: firstURL.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: secondURL.path))
+    }
+
     func testNewRecordingDoesNotAttemptPlaybackWithoutSavedFile() async {
         let model = AudioRecordingViewModel(container: .test)
 
@@ -97,6 +203,28 @@ final class AudioRecordingTests: XCTestCase {
         XCTAssertTrue(model.errorMessage.isEmpty)
         XCTAssertTrue(model.playbackUnavailableMessage.contains("no longer available"))
         XCTAssertEqual(model.playbackDuration, 0)
+    }
+
+    func testMissingLegacyFileRemainsLocalizedAndPreservesNote() async throws {
+        let container = DependencyContainer.test
+        let session = CaptureSession(title: "Legacy Recording", mode: .create, status: .completed)
+        let missingURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension("m4a")
+        let source = CaptureSource(sessionID: session.id, sourceType: .liveAudio, sourceURL: missingURL)
+        let note = CuratedNote(sessionID: session.id, title: "Legacy Note", smartSummary: "Keep me")
+        try await container.sessions.save(session)
+        try await container.sources.save(source)
+        try await container.curatedNotes.save(note)
+
+        let playback = AudioRecordingViewModel(container: container)
+        await playback.loadPlayback(url: missingURL)
+
+        XCTAssertTrue(playback.playbackUnavailableMessage.contains("no longer available"))
+        let sources = try await container.sources.fetchSources(for: session.id)
+        let savedNote = try await container.curatedNotes.fetchNote(for: session.id)
+        XCTAssertEqual(sources.count, 1)
+        XCTAssertEqual(savedNote?.smartSummary, "Keep me")
     }
 
     func testConsentNoticeFirstDisplayAndSubsequentSuppression() async {
@@ -296,5 +424,39 @@ final class AudioRecordingTests: XCTestCase {
 
         XCTAssertFalse(model.isPlaybackPlaying)
         XCTAssertEqual(model.playbackPosition, 0, accuracy: 0.05)
+    }
+}
+
+private actor TrackingAudioPlaybackProvider: AudioPlaybackProviding {
+    private(set) var loadedURLs: [URL] = []
+    private var provider = MockAudioPlaybackProvider(duration: 3)
+
+    func load(url: URL) async throws -> TimeInterval {
+        loadedURLs.append(url)
+        return try await provider.load(url: url)
+    }
+
+    func play() async throws {
+        try await provider.play()
+    }
+
+    func pause() async {
+        await provider.pause()
+    }
+
+    func seek(to time: TimeInterval) async {
+        await provider.seek(to: time)
+    }
+
+    func currentTime() async -> TimeInterval {
+        await provider.currentTime()
+    }
+
+    func isPlaying() async -> Bool {
+        await provider.isPlaying()
+    }
+
+    func lastLoadedURL() -> URL? {
+        loadedURLs.last
     }
 }

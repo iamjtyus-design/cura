@@ -27,6 +27,7 @@ public struct SessionDetailView: View {
     @State private var showingDeleteRecordingConfirmation = false
     @State private var isAddingFolder = false
     @State private var detailFolderName = ""
+    @State private var isShowingSessionInfo = false
 
     public init(model: PhaseOneViewModel, recordingModel: AudioRecordingViewModel, session: CaptureSession) {
         self.model = model
@@ -55,6 +56,14 @@ public struct SessionDetailView: View {
                         Text("\(mode.displayName) • \(session.createdAt.formatted(date: .abbreviated, time: .shortened))\(durationText)")
                             .foregroundStyle(.secondary)
                             .font(.subheadline)
+                        if let note, shouldShowGeneratedTitleUndo(for: note) {
+                            Button("Undo Generated Title") {
+                                Task { await model.undoGeneratedTitle(for: session, note: note) }
+                            }
+                            .font(.caption.weight(.semibold))
+                            .buttonStyle(.bordered)
+                            .accessibilityIdentifier("undoGeneratedTitleButton")
+                        }
                     }
                     Spacer()
                     Button {
@@ -74,85 +83,6 @@ public struct SessionDetailView: View {
                 if shouldShowAudioProcessingControls {
                     audioProcessingControls
                 }
-
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Session Details")
-                        .font(.headline)
-                    Picker("Mode", selection: $mode) {
-                        ForEach(CaptureMode.allCases, id: \.self) { mode in
-                            Text(mode.displayName).tag(mode)
-                        }
-                    }
-                    Text(mode.guidance)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    Picker("Folder", selection: $folderID) {
-                        Text("No Folder").tag(UUID?.none)
-                        ForEach(model.folders) { folder in
-                            Text(folder.name).tag(Optional(folder.id))
-                        }
-                    }
-                    if isAddingFolder {
-                        VStack(alignment: .leading, spacing: 8) {
-                            TextField("New folder name", text: $detailFolderName)
-                                .textFieldStyle(.roundedBorder)
-                                .accessibilityLabel("New folder name")
-                            HStack {
-                                Button("Save Folder") {
-                                    model.newFolderName = detailFolderName
-                                    Task {
-                                        if let folder = await model.addFolder() {
-                                            folderID = folder.id
-                                            detailFolderName = ""
-                                            isAddingFolder = false
-                                        }
-                                    }
-                                }
-                                .buttonStyle(.borderedProminent)
-                                .disabled(detailFolderName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                                .accessibilityIdentifier("saveFolderButton")
-
-                                Button("Cancel") {
-                                    detailFolderName = ""
-                                    isAddingFolder = false
-                                }
-                                .buttonStyle(.bordered)
-                            }
-                        }
-                    } else {
-                        Button("Add Folder") {
-                            isAddingFolder = true
-                        }
-                        .buttonStyle(.bordered)
-                        .accessibilityLabel("Add Folder")
-                    }
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Processing")
-                            .font(.subheadline.weight(.semibold))
-                        Text("Private and Smart currently use the same local mock processing in this build. Smart enhancements are unavailable until a later approved phase.")
-                            .foregroundStyle(.secondary)
-                    }
-                        .font(.caption)
-
-                    Button("Save Session Details") {
-                        Task {
-                            await model.saveSessionMetadata(
-                                session,
-                                title: title,
-                                mode: mode,
-                                folderID: folderID,
-                                processingMode: processingMode
-                            )
-                        }
-                    }
-                    .buttonStyle(.bordered)
-                    .accessibilityLabel("Save Session Details")
-                }
-                .padding()
-                .background(PhaseOneSurface.secondary)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
 
                 if audioSource != nil || note != nil {
                     VStack(alignment: .leading, spacing: 14) {
@@ -174,6 +104,86 @@ public struct SessionDetailView: View {
                         }
                     }
                 }
+
+                DisclosureGroup("Session Info", isExpanded: $isShowingSessionInfo) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Picker("Mode", selection: $mode) {
+                            ForEach(CaptureMode.allCases, id: \.self) { mode in
+                                Text(mode.displayName).tag(mode)
+                            }
+                        }
+                        Text(mode.guidance)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        Picker("Folder", selection: $folderID) {
+                            Text("No Folder").tag(UUID?.none)
+                            ForEach(model.folders) { folder in
+                                Text(folder.name).tag(Optional(folder.id))
+                            }
+                        }
+                        if isAddingFolder {
+                            VStack(alignment: .leading, spacing: 8) {
+                                TextField("New folder name", text: $detailFolderName)
+                                    .textFieldStyle(.roundedBorder)
+                                    .accessibilityLabel("New folder name")
+                                HStack {
+                                    Button("Save Folder") {
+                                        model.newFolderName = detailFolderName
+                                        Task {
+                                            if let folder = await model.addFolder() {
+                                                folderID = folder.id
+                                                detailFolderName = ""
+                                                isAddingFolder = false
+                                            }
+                                        }
+                                    }
+                                    .buttonStyle(.borderedProminent)
+                                    .disabled(detailFolderName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                                    .accessibilityIdentifier("saveFolderButton")
+
+                                    Button("Cancel") {
+                                        detailFolderName = ""
+                                        isAddingFolder = false
+                                    }
+                                    .buttonStyle(.bordered)
+                                }
+                            }
+                        } else {
+                            Button("Add Folder") {
+                                isAddingFolder = true
+                            }
+                            .buttonStyle(.bordered)
+                            .accessibilityLabel("Add Folder")
+                        }
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Processing")
+                                .font(.subheadline.weight(.semibold))
+                            Text("Private and Smart currently use the same local mock processing in this build. Smart enhancements are unavailable until a later approved phase.")
+                                .foregroundStyle(.secondary)
+                        }
+                        .font(.caption)
+
+                        Button("Save Session Details") {
+                            Task {
+                                await model.saveSessionMetadata(
+                                    session,
+                                    title: title,
+                                    mode: mode,
+                                    folderID: folderID,
+                                    processingMode: processingMode
+                                )
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                        .accessibilityLabel("Save Session Details")
+                    }
+                    .padding(.top, 10)
+                }
+                .padding()
+                .background(PhaseOneSurface.secondary)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
 
                 if let caption {
                     VStack(alignment: .leading, spacing: 12) {
@@ -391,7 +401,9 @@ public struct SessionDetailView: View {
     private var recordingContent: some View {
         if let audioSource {
             VStack(alignment: .leading, spacing: 12) {
-                AudioPlaybackView(recordingModel: recordingModel, source: audioSource)
+                AudioPlaybackView(recordingModel: recordingModel, source: audioSource) {
+                    Task { await model.deleteRecording(audioSource) }
+                }
 
                 Button("Delete Recording", role: .destructive) {
                     showingDeleteRecordingConfirmation = true
@@ -427,6 +439,14 @@ public struct SessionDetailView: View {
             return "Demo transcript - this sample content was not generated from your recording."
         }
         return "Transcript generated by the active transcription provider. Review and edit derived notes before relying on them."
+    }
+
+    private func shouldShowGeneratedTitleUndo(for note: CuratedNote) -> Bool {
+        guard let confirmedTitle = note.confirmedTitle?.trimmingCharacters(in: .whitespacesAndNewlines),
+              let suggestedTitle = note.suggestedTitle?.trimmingCharacters(in: .whitespacesAndNewlines) else {
+            return false
+        }
+        return !confirmedTitle.isEmpty && confirmedTitle == suggestedTitle && session.title == suggestedTitle
     }
 }
 

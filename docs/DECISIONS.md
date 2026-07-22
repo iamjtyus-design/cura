@@ -393,3 +393,50 @@
 3. Mock transcript and Curated Note content is labeled as demo sample content not generated from the user's recording.
 4. Completed audio notes hide stale processing panels and never imply Creator Pack generation.
 5. Phase 2B.2 provider selection, production transcription, cloud upload, live AI, Supabase, RevenueCat, authentication, and publishing remain deferred.
+
+## D-033: Phase 2B.1.2 fresh playback validates durable audio before persistence
+
+**Date:** 2026-07-21
+
+**Decision:** Validate each freshly stopped recording as a playable durable audio file before persisting its Capture Source, and configure playback with a speaker-forward AVFoundation audio session on device.
+
+**Reason:** Physical-device QA showed newly recorded sessions could save duration metadata but produce no audible playback. Fresh recording playback must work before leaving Session Detail, after reopening the session, and after ordinary app relaunch.
+
+**Consequences:**
+
+1. Recorder output must be finalized into Application Support media storage before it becomes session metadata.
+2. The persisted source URL points to `CURA/Media/<sessionID>/<sourceID>.m4a`, not a temporary file.
+3. Playback loading checks file existence, file size, and audio duration before enabling play.
+4. DEBUG-only diagnostics may log local paths and playback details for development, but production UI does not expose paths or UUID filenames.
+5. Development reinstall/build replacement can replace the app container and is not treated as ordinary relaunch persistence.
+
+## D-034: Phase 2B.1.2 missing legacy files remain session-local
+
+**Date:** 2026-07-21
+
+**Decision:** Preserve missing-file state only on the affected session, keep its transcript and Curated Note, and offer a non-destructive remove-source-reference action.
+
+**Reason:** Older sessions may reference files that no longer exist after development reinstall or other local-container changes. That should not become a generic playback failure or delete useful session knowledge.
+
+**Consequences:**
+
+1. Playback controls are disabled only for the missing source.
+2. Transcript and Curated Note content remain readable.
+3. The app does not automatically delete the session or generated content.
+4. Future cleanup can improve broken-source repair without changing the current data boundary.
+
+## D-035: Phase 2B.1.2 demo timing, title, and note-model preparation
+
+**Date:** 2026-07-21
+
+**Decision:** Keep `local-demo-mock` deterministic but shorten the staged demo to roughly 3 seconds, auto-apply generated titles only for untouched fallback audio titles, and add migration-safe Curated Note document blocks for future formatted editing.
+
+**Reason:** The mock flow should feel clearly demonstrative, not production-duration, while title behavior should help untouched audio sessions without overwriting user edits. The Curated Note model should be ready for one formatted editable document later without destructive migration now.
+
+**Consequences:**
+
+1. Demo processing still shows Preparing Audio, Transcribing, Building Curated Note, and Ready.
+2. Manually edited or previously confirmed titles are protected.
+3. Untouched "Audio Recording" titles can update immediately to the generated suggestion and show Undo/Edit affordance.
+4. Curated Notes can carry stable blocks for heading, paragraph, bold, italic, bullet list, numbered list, checklist, generated text, and user-authored text.
+5. No rich-text editor, production transcription provider, cloud upload, AI generation, Supabase, RevenueCat, authentication, or Phase 2B.2 work is introduced.

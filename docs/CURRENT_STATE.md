@@ -1,6 +1,6 @@
 # Current State
 
-Phase 2B.1.1 physical-device QA remediation is implemented on top of the approved Phase 2B.1 audio transcription and first editable Curated Note flow.
+Phase 2B.1.2 physical-device playback and session-experience remediation is implemented on top of the approved Phase 2B.1 audio transcription and first editable Curated Note flow.
 
 Current foundation and Phase 1 slice:
 
@@ -79,6 +79,14 @@ Current foundation and Phase 1 slice:
 73. Suggested action completion now uses checkbox-style controls instead of settings-style switches.
 74. Curated Note summary, key points, and user notes use more readable multiline editing surfaces.
 75. Folder creation is disclosed behind Add Folder, prevents blank saves, and preserves folder assignment/persistence.
+76. Freshly saved recordings are validated as playable durable files before their Capture Source metadata is persisted.
+77. AVFoundation playback uses a speaker-forward play-and-record audio session for saved recordings so device playback is audible after recording.
+78. Debug-only audio diagnostics log saved file URL, file existence, file size, duration, playback load, audio-session activation, route, and playback failures without exposing paths in production UI.
+79. Missing legacy audio files remain localized to the affected session, preserve transcript and Curated Note data, and expose a non-destructive remove-source-reference action.
+80. The deterministic `local-demo-mock` transcription flow now completes the staged demo in approximately 3 seconds while still showing Preparing Audio, Transcribing, Building Curated Note, and Ready.
+81. Generated suggested titles auto-apply only when the session title is still the untouched fallback "Audio Recording"; manual or previously confirmed titles remain protected.
+82. Saved Session Detail now emphasizes title, date, duration, mode, favorite, and Curated Note / Transcript / Recording tabs, with setup and organization controls moved into a secondary Session Info disclosure.
+83. Curated Note now includes migration-safe document block preparation for heading, paragraph, bold, italic, bullet list, numbered list, checklist, generated text, user-authored text, stable block IDs, and future schema migration.
 
 Verification on 2026-07-20:
 
@@ -206,3 +214,20 @@ Phase 2B.1.1 verification on 2026-07-21:
 12. `xcrun devicectl device install app` installed `com.visionbuilt.cura` successfully on the connected iPhone.
 13. `xcrun devicectl device process launch --terminate-existing com.visionbuilt.cura` launched successfully.
 14. Automated verification confirms playback state/progress behavior in simulator; audible physical-device output still requires manual listening.
+
+Phase 2B.1.2 verification on 2026-07-21:
+
+1. Fresh-playback root cause was that saved audio metadata could be persisted before the finalized recorder output was validated as a playable durable file, and playback after recording did not force a speaker-forward device route.
+2. Durable audio files remain under Application Support media storage at `CURA/Media/<sessionID>/<sourceID>.m4a`; persisted Capture Source URLs point to that durable location, not temporary storage.
+3. Ordinary relaunch preserves the app container, JSON library, and media files; development reinstall or build replacement can replace the app container and is documented separately from ordinary relaunch persistence.
+4. `swift test` passed with 49 tests.
+5. `xcodebuild -project Cura.xcodeproj -scheme CuraApp -destination 'id=0001DB82-B759-4301-AB9C-F79DC34B9867' test` passed with 49 unit tests and 3 UI tests.
+6. The UI flow verifies playback state/progress, seek, pause/resume, retry, relaunch transcript persistence, and updated title behavior.
+7. Explicit simulator build passed on iPhone 17 Pro, iOS 26.5, UDID `0001DB82-B759-4301-AB9C-F79DC34B9867`.
+8. Device Debug build passed for connected iPhone 17 Pro Max, UDID `6A67316D-CE7A-5520-B8B7-BCAEBE23E5F3`, with the local development team supplied outside committed source.
+9. `codesign --verify --deep --strict --verbose=2` passed for the physical-device `Cura.app`.
+10. `codesign --verify --strict --verbose=2` passed for embedded `CuraCore.framework`.
+11. `xcrun devicectl device install app` installed `com.visionbuilt.cura` successfully on the connected iPhone.
+12. `xcrun devicectl device process launch --terminate-existing com.visionbuilt.cura` launched successfully on the connected iPhone.
+13. Focused physical-device UI playback automation was attempted, but Xcode timed out enabling automation mode for the test runner before the test could execute.
+14. Audible output still requires human verification on the physical iPhone speaker/headphones.
